@@ -61,6 +61,7 @@ class Simulator(object):
 
     def run(self, n_trials=1):
         self.quit = False
+        self.results = []
         for trial in xrange(n_trials):
             print "Simulator.run(): Trial {}".format(trial)  # [debug]
             self.env.reset()
@@ -102,8 +103,15 @@ class Simulator(object):
                     if self.quit or self.env.done:
                         break
 
+            # still in for loop
+            if self.env.success:
+                self.results.append(tuple([1, self.env.t, self.env.score, self.env.penalty]))
+            else:
+                self.results.append(tuple([0, self.env.t, self.env.score, self.env.penalty]))
             if self.quit:
                 break
+
+        return self.results
 
     def render(self):
         # Clear screen
@@ -166,6 +174,13 @@ class Simulator(object):
             for event in self.pygame.event.get():
                 if event.type == self.pygame.KEYDOWN:
                     self.paused = False
+                    if self.update_delay > 0:
+                       self.old_delay = self.update_delay
+                       self.update_delay = 0
+                    else:
+                       self.update_delay = self.old_delay
+                    self.frame_delay = max(1, int(self.update_delay * 1000))  # delay between GUI frames in ms (min: 1)
+      
             self.pygame.time.wait(self.frame_delay)
         self.screen.blit(self.font.render(pause_text, True, self.bg_color, self.bg_color), (100, self.height - 40))
         self.start_time += (time.time() - abs_pause_time)

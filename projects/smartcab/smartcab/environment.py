@@ -1,5 +1,6 @@
 import time
 import random
+import math
 from collections import OrderedDict
 
 from simulator import Simulator
@@ -35,6 +36,9 @@ class Environment(object):
         self.num_dummies = num_dummies  # no. of dummy agents
         
         # Initialize simulation variables
+        self.success = False
+        self.score = 0
+        self.penalty = 0
         self.done = False
         self.t = 0
         self.agent_states = OrderedDict()
@@ -76,7 +80,10 @@ class Environment(object):
 
     def reset(self):
         self.done = False
+        self.success = False
         self.t = 0
+        self.score = 0
+        self.penalty = 0
 
         # Reset traffic lights
         for traffic_light in self.intersections.itervalues():
@@ -156,7 +163,7 @@ class Environment(object):
                 if left != 'forward':  # we don't want to override left == 'forward'
                     left = other_heading
 
-        return {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
+        return {'light': light, 'oncoming': oncoming, 'left': left, 'right': right, 'location': location}
 
     def get_deadline(self, agent):
         return self.agent_states[agent]['deadline'] if agent is self.primary_agent else None
@@ -198,22 +205,30 @@ class Environment(object):
                 state['location'] = location
                 state['heading'] = heading
                 reward = 2.0 if action == agent.get_next_waypoint() else -0.5  # valid, but is it correct? (as per waypoint)
+                if reward < 0 and agent is self.primary_agent:
+                   print "Odd move:", action, "vs", agent.get_next_waypoint()
             else:
                 # Valid null move
                 reward = 0.0
         else:
             # Invalid move
+            print "Invalid move"
             reward = -1.0
 
         if agent is self.primary_agent:
             if state['location'] == state['destination']:
                 if state['deadline'] >= 0:
-                    reward += 10  # bonus
+                    bonus = 10 + 2*state['deadline']  # bonus
+                    bonus = 10
+                    reward += bonus
+                    self.success = True
                 self.done = True
-                print "Environment.act(): Primary agent has reached destination!"  # [debug]
+                print "Environment.act(): Primary agent has reached destination! Bonus=", bonus  # [debug]
             self.status_text = "state: {}\naction: {}\nreward: {}".format(agent.get_state(), action, reward)
+            if reward < 0:
+                self.penalty += reward
+            self.score += reward
             #print "Environment.act() [POST]: location: {}, heading: {}, action: {}, reward: {}".format(location, heading, action, reward)  # [debug]
-
         return reward
 
     def compute_dist(self, a, b):
