@@ -188,6 +188,7 @@ def run(count=500):
                 a = e.create_agent(LearningAgent)  # create agent
                 a.alpha = alpha
                 a.gamma = gamma
+                a.epsilon = epsilon
                 e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
 
                 # Now simulate it
