@@ -59,4 +59,5 @@ Best in class:
     alpha 0.8
     gamma 0.2
     mean penalty -0.107
-    stdev penalty 0.427844597956```
+    stdev penalty 0.427844597956
+```
