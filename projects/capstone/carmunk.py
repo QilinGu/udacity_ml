@@ -129,8 +129,6 @@ class GameState:
     def current(self):
         x, y = self.car_body.position
         readings = self.get_sonar_readings(x, y, self.car_body.angle)
-#        readings.append(int(self.goal_distance()))
-#        readings.append(self.best_action())
         state = np.array(readings)
         return state
 
@@ -158,8 +156,7 @@ class GameState:
             self.move_cat()
 
         driving_direction = Vec2d(1, 0).rotated(self.car_body.angle)
-        v2 = 100 * self.game.scale * driving_direction
-        self.car_body.velocity = v2  # as if
+        self.car_body.velocity = 100 * self.game.scale * driving_direction
 
         # Update the screen and stuff.
         self.update_screen("black")
@@ -170,12 +167,12 @@ class GameState:
             # Car crashed when any reading == 1
             self.crashed = True
             terminal = True
-            reward = -500
+            reward = -10
             self.recover_from_crash(driving_direction)
         else:
             # Higher readings are better, so return the sum.
             terminal = False
-            reward = int(np.sum(readings)/10.0)-5
+            reward = int(np.sum(readings)/10.0)
         self.num_steps += 1
 
         return reward, readings, terminal
@@ -262,7 +259,7 @@ class GameState:
                 return i  # Sensor is off the screen.
             else:
                 obs = self.game.screen.get_at(rotated_p)
-                if self.get_track_or_not(obs) != 0:
+                if self.get_track_or_not(obs, i == 1) != 0:
                     return i
 
             if self.game.show_sensors:
@@ -272,7 +269,7 @@ class GameState:
         return i
 
     def make_sonar_arm(self, x, y):
-        spread = max(2,int(0.5+10*self.game.scale))  # Default spread.
+        spread = 10
         distance = int(self.game.scale*20+0.5)  # Gap before first sensor.
         arm_points = []
         # Make an arm. We build it flat because we'll rotate it about the
@@ -292,12 +289,8 @@ class GameState:
         new_y = self.game.height - (y_change + y_1)
         return int(new_x), int(new_y)
 
-    def get_track_or_not(self, reading):
-        if reading == THECOLORS['black']:
-            return 0
-        else:
-            # collision
-            return 1
+    def get_track_or_not(self, reading, first):
+        return (reading in [THECOLORS[x] for x in ['orange', 'blue', 'red']])*1
 
 class Game:
     def __init__(self, scale):
