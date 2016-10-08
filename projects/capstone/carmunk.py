@@ -167,7 +167,7 @@ class GameState:
             # Car crashed when any reading == 1
             self.crashed = True
             terminal = True
-            reward = -10
+            reward = -100
             self.recover_from_crash(driving_direction)
         else:
             # Higher readings are better, so return the sum.
@@ -233,6 +233,14 @@ class GameState:
         readings.append(self.get_arm_distance(arm_left, x, y, angle, 0.75))
         readings.append(self.get_arm_distance(arm_middle, x, y, angle, 0))
         readings.append(self.get_arm_distance(arm_right, x, y, angle, -0.75))
+
+        """
+        # add three more
+        back = angle+math.pi
+        readings.append(self.get_arm_distance(arm_left, x, y, back, 0.75))
+        readings.append(self.get_arm_distance(arm_middle, x, y, back, 0))
+        readings.append(self.get_arm_distance(arm_right, x, y, back, -0.75))
+        """
 
         if self.game.show_sensors:
             pygame.display.update()

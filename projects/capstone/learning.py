@@ -29,7 +29,7 @@ class SQN:
 
     # Shallow Q-Learning network, as opposed to "deep"
     
-    def __init__(self, name='q_value'):
+    def __init__(self, name='q_value', track=False):
         # Tf graph input
         self.name = name
         self.summaries = None
@@ -42,20 +42,27 @@ class SQN:
                         ['w2', [n_hidden_1, n_hidden_2]],
                         ['w3', [n_hidden_2, n_hidden_3]],
                         ['w_out', [n_hidden_3, n_actions]]]
-        self.weights = self.make_vars(self.weights, 0.1)
+        self.weights = self.make_vars(self.weights, track=track)
 
         self.biases =  [['b1', [n_hidden_1]],
                         ['b2', [n_hidden_2]],
                         ['b3', [n_hidden_3]],
                         ['b_out', [n_actions]]]
-        self.biases = self.make_vars(self.biases, 0.01)
+        self.biases = self.make_vars(self.biases, constant=True, track=track)
         self.q_value = self.build_perceptron()
         self.q_action = tf.argmax(self.q_value, dimension=1)
+        self.q_max = tf.Variable(0.0, name="q_max/"+name)
+        self.q_max_val = 0.0
 
-    def make_vars(self, spec, scale):
+    def make_vars(self, spec, constant=False, track=False):
         vars = {}
         for name, shape in spec:
-            vars[name] = tf.Variable(scale*tf.random_normal(shape), name=name)
+            if constant:
+                vars[name] = tf.Variable(tf.constant(0.01, shape=shape), name=name)
+            else:
+                vars[name] = tf.Variable(tf.truncated_normal(shape, stddev=0.01), name=name)
+            if track:
+                tf.histogram_summary(self.name+"/"+name, vars[name])
         return vars
 
     def copy_sqn(self, session, sqn):
@@ -73,7 +80,7 @@ class SQN:
         layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1, w['w2']), b['b2']))
         layer_2 = tf.nn.dropout(layer_2, 0.8)
         layer_3 = tf.nn.relu(tf.add(tf.matmul(layer_2, w['w3']), b['b3']))
-        layer_3 = tf.nn.dropout(layer_3, 0.8)
+        #layer_3 = tf.nn.dropout(layer_3, 0.8)
         result = tf.add(tf.matmul(layer_3, w['w_out']), b['b_out'])
         return result
 
@@ -84,11 +91,14 @@ class SQN:
         y = tf.reduce_sum(self.q_value * action_one_hot, reduction_indices=1)
         self.loss = tf.reduce_mean(tf.square(self.y_prime - y))
         tf.scalar_summary('loss', self.loss)
+        tf.scalar_summary('qmax', self.q_max)
         self.optim = tf.train.RMSPropOptimizer(0.00025,0.99,0.0,1e-6).minimize(self.loss)
 
     def predict(self, session, states):
-        feed = {self.x: states}
-        return session.run(self.q_value, feed_dict=feed)
+        feed = {self.x: states, self.q_max: self.q_max_val}
+        qv = session.run(self.q_value, feed_dict=feed)
+        self.q_max_val = max(np.max(qv), self.q_max_val)
+        return qv
 
     def learn(self, session, target_network, samples):
         a = np.array(samples)
@@ -98,9 +108,11 @@ class SQN:
         X_t1 = np.stack(a[:,3])
         dead_ends = np.stack(a[:,4])
         max_q_t1 = np.max(target_network.predict(session, X_t1), axis=1)*(1-dead_ends)
+        self.q_max_val = max(np.max(max_q_t1), self.q_max_val)
         y_prime = n_gamma * max_q_t1  + rewards
         inputs = {self.y_prime: y_prime,
                   self.action: actions,
+                  self.q_max: self.q_max_val,
                   self.x: X}
         summary, _, q_t, loss = session.run([self.summaries, self.optim, self.q_value, self.loss], inputs)
         return summary, q_t, loss
@@ -119,13 +131,11 @@ class Learner:
 
     def __init__(self):
         self.s = tf.Session()
-        self.q_train = SQN('q_train')
+        self.q_train = SQN('q_train', track=True)
         self.q_train.build_optimizer()
         self.q_target = SQN('q_target')
         self.games_played = 0
         self.min_epsilon = n_min_epsilon
-        self.tf_best_q = tf.Variable(0, name="q_best")
-        tf.scalar_summary('q_max', self.tf_best_q)
         self.reset()
 
     def mute(self):
@@ -170,12 +180,7 @@ class Learner:
 
     def guess_actions(self):
         self.s_t = np.ravel(np.array(self.frames))  #state
-        self.q_t = self.q_train.predict(self.s, np.array([self.s_t]))[0]
-        # log our best q_value to date
-        self.best_q = max(np.max(self.q_t), self.best_q)
-        summary, _ = self.s.run([self.summaries, tf.assign(self.tf_best_q, self.best_q)],
-            feed_dict={self.q_train.x: [[0,0,0]], self.q_train.y_prime: [0], self.q_train.action: [0]})
-        self.log(summary)
+        self.q_t = self.q_target.predict(self.s, np.array([self.s_t]))[0]
 
     def choose_action(self):
         # choose an action
@@ -213,8 +218,9 @@ class Learner:
         if self.t > n_observe:
             self.learning_step += 1
             summary, q_t, loss = self.q_train.learn(self.s, self.q_target, random.sample(self.replay, n_batch_size))
-            self.log(summary)
-            self.losses.append(loss)
+            if (self.learning_step % 100) == 99:
+                self.log(summary)
+                self.losses.append(loss)
             if (self.learning_step % n_network_update_frames) == 0:
                 if len(self.games):
                     print "Games played ", self.games_played
