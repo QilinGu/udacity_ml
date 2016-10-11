@@ -1,7 +1,8 @@
-# Virtual Self-driving Cars with Tensorflow
+# Self-driving Cars with Tensorflow
+## A Capstone Project
 
-This project was submitted as my Capstone Project for 
-Sebastian Thrun's Machine Learning Engineer Nanodegree
+This project was submitted in partial fulfillment
+of Sebastian Thrun's Machine Learning Engineer Nanodegree
 on Udacity.
 
 Scott Penberthy  
@@ -131,7 +132,7 @@ In [8]: for i in range(25000): ai.step()
 Now launch another terminal and ```cd``` to the repository directory, activating tensorflow
 as before.  You'll see new content in the
 log directory.  Don't worry. Your log filename will be different than mine, a combo of time and your local machine
-name.  Launch tensorboard and point to this directory.  T
+name.  Launch tensorboard and point to this directory.
 ```
 % source activate tensorflow
 
