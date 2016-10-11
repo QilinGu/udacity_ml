@@ -53,6 +53,25 @@ The simulator returns three values at each iteration:
 This has been successfully tested on a MacBook Pro running OS X El Capitan.  We welcome contributors
 to test on other platforms!
 
+### Running the code
+After successfully cloning this repository and installing all the pre-requisites, let's activate
+the TensorFlow environment in Python and launch iPython:
+
+```
+% source activate tensorflow
+(tensorflow) % ipython
+Python 2.7.12 |Continuum Analytics, Inc.| (default, Jul  2 2016, 17:43:17) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]: 
+```
+
 ### Metrics
 In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
 - _Are the metrics you’ve chosen to measure the performance of your models clearly discussed and defined?_
