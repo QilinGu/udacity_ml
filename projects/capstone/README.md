@@ -1,10 +1,11 @@
-# Capstone Project
+# Self-driving toy cars with Tensorflow
+## Capstone Project
 ## Machine Learning Engineer Nanodegree
 
 Scott Penberthy  
 November 1, 2016
 
-_This is a work in progress, publishing by the end of October if I'm lucky_
+_[Ed. This is a work in progress, publishing by the end of October if I'm lucky!]_
 
 ## I. Definition
 
@@ -24,8 +25,7 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 ### Problem Statement
 ![fig1](https://cdn-images-1.medium.com/max/1200/1*K11fcwyorgnbTcl5dEnxVw.jpeg)
-Your job is to write an AI for a toy car that learns how to drive by itself in a simulated
-environment.  
+Your job is to write an AI for a simulated toy car that learns how to drive by itself.  
 
 The figure above captures our toy car scenario.  The car is shown in green, sensing the environment
 via three sonar sensors. Three slow-moving obstacles are shown in blue.  A cat darts around the
@@ -63,7 +63,8 @@ object?   -> Details about 'object', use 'object??' for extra details.
 In [1]: 
 ```
 
-Next, let's import our file and create our Deep Q learner with the test environment:
+Next, let's import our file then create our Deep Q learner with the test environment in 
+one line of code:
 ```python
 In [1]: from learning import *
 
@@ -74,8 +75,8 @@ _[ed. At the time of this writing, you may see warning statements on a Mac about
 need audio for this task.]_
 
 The ```ai``` object is our Deep Q Learner, without the deep, controlling a simluated game ```g```
-analyzed by a Tensorflow environment ```s```.  Let's get into it.  Try the following to first demo 1000 steps 
-and watch the car drive!  At this point the algorithm is purely random.
+analyzed by a Tensorflow session ```s```.  Let's get into it.  Try the following to demo 1000 steps of
+the simulator and watch the car drive!  At this point the algorithm is purely random.
 
 ```python
 In [3]: ai.demo()
