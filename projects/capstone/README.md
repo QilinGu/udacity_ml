@@ -54,7 +54,7 @@ This has been successfully tested on a MacBook Pro running OS X El Capitan.  We 
 to test on other platforms!
 
 ### Running the code
-After successfully cloning this repository and installing all the pre-requisites, ```cd``` to
+After successfully cloning this repository and installing all the prerequisites, ```cd``` to
 the repository directory so we have access to ```learning.py``` and ```carmunk.py```.  Let's activate
 the TensorFlow environment and launch an interactive python shell:
 
@@ -72,6 +72,44 @@ object?   -> Details about 'object', use 'object??' for extra details.
 
 In [1]: 
 ```
+
+Next, let's import our file and create our Deep Q learner with the test environment:
+```python
+In [1]: from learning import *
+
+In [2]: ai = Learner()
+```
+
+At the time of this writing, you may see warning statements on a Mac about using outdated audio controls.  That's OK.  We don't
+need audio for this task.  The ```ai``` object is our Deep Q Learner, without the deep, controlling a simluated game ```g```
+analyzed by a Tensorflow environment ```s```.  Let's get into it.  Try the following to first demonstrate 1000 steps 
+and watch the car drive!  Since we're just getting started, epsilon learning kicks in and the actions are randomly chosen
+as we fill up experience memory.
+
+```python
+In [3]: ai.demo()
+```
+
+You can try each step yourself, going straight, left or right.  You'll see three items returned,
+the reward, an array of sensor readings, and a boolean indicating whether you've hit a wall
+or object:
+
+```python
+In [4]: ai.g.step(0)
+(-2.0, array([ 6.        ,  4.        ,  6.        ,  0.13147931,  0.16259441,
+         4.68615124]), False)
+
+In [5]: ai.g.step(1)
+(-2.0, array([ 4.        ,  4.        ,  6.        ,  0.12923619,  0.14867274,
+         4.48615124]), False)
+
+
+In [6]: ai.g.step(2)
+(-3.0, array([ 5.        ,  3.        ,  5.        ,  0.12897384,  0.13439194,
+         4.68615124]), False)
+```
+
+
 
 ### Metrics
 In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
