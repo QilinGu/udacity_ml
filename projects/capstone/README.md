@@ -2,8 +2,7 @@
 ## A Capstone Project
 
 This project was submitted in partial fulfillment
-of Sebastian Thrun's Machine Learning Engineer Nanodegree
-on Udacity.
+of the Udacity Machine Learning Engineer Nanodegree.
 
 Scott Penberthy  
 November 1, 2016
