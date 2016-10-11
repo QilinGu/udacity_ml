@@ -1,6 +1,5 @@
 # Self-driving Toy Cars with Tensorflow
-### Capstone Project
-### Machine Learning Engineer Nanodegree
+### Capstone Project, Machine Learning Engineer Nanodegree
 
 Scott Penberthy  
 November 1, 2016
