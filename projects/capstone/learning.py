@@ -12,20 +12,15 @@ import math
 # Network parameters
 
 # 1. radar, position, theta and 8 frames of history
-# 2. radar, position, theta an no history
+# 2. radar, position, theta and no history
+# 3. [128, 256, 256, 256, 256, 128]
 # 3. radar, 16 frames of history
+#
 #
 # We still haven't broken through to perfect performance or
 # tens of thousands of frames.
 
-n_hidden = [128] + [256]*14 + [128]
-
-"""
-n_hidden_1 = 128
-n_hidden_2 = 256
-n_hidden_3 = 256
-"""
-
+n_hidden = [32] + [64]*6 + [32]
 n_min_epsilon = 0.01
 n_input = 6
 n_actions = 3
@@ -57,10 +52,9 @@ class SQN:
         for i in range(len(dims)-1):
             w += [['w'+str(i+1), dims[i:i+2]]]
             b += [['b'+str(i+1), dims[i+1:i+2]]]
-
-        print "weights", w, "biases", b
         self.weights = self.make_vars(w, track=track)
         self.biases = self.make_vars(b, constant=True, track=track)
+
         self.q_value = self.build_perceptron()
         if track:
             tf.histogram_summary(self.name + "/q_value", self.q_value)
@@ -90,12 +84,9 @@ class SQN:
         b = self.biases 
         layers = [tf.nn.relu(tf.add(tf.matmul(self.x, w['w1']), b['b1']))]
         for i in range(1, len(n_hidden)):
-            si = str(i+1)
-            print "\nlayer", si
-            print "weights", w['w'+si].get_shape().as_list()
-            print "bias", b['b'+si].get_shape().as_list()
+            _i = str(i+1)
             layers[i-1] = tf.nn.dropout(layers[i-1], 0.8)
-            layers += [tf.nn.relu(tf.add(tf.matmul(layers[i-1], w['w'+str(i+1)]),b['b'+str(i+1)]))]
+            layers += [tf.nn.relu(tf.add(tf.matmul(layers[i-1], w['w'+_i]),b['b'+_i]))]
         nth = str(len(n_hidden)+1)
         result = tf.add(tf.matmul(layers[-1:][0], w['w'+nth]), b['b'+nth])
         return result
