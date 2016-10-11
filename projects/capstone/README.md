@@ -100,7 +100,6 @@ In [6]: ai.g.step(2)
 ```
 
 
-
 ### Metrics
 In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
 - _Are the metrics you’ve chosen to measure the performance of your models clearly discussed and defined?_
@@ -122,7 +121,8 @@ You're allowed to take three actions:
 - 1, turn left by 0.2 radians
 - 2, turn right by 0.2 radians
 
-The simulator returns three values at each iteration:
+In addition to the sensor readings, the simulator also returns the following at
+each iteration:
 - Reward, an integer in [-100, 10] where negative values are bad, positive values are good
 - Terminal, a boolean indicating whether a crash has occurred
 
