@@ -1,6 +1,7 @@
 # Capstone Project
 ## Machine Learning Engineer Nanodegree
-Scott Penberthy
+
+Scott Penberthy  
 November 1, 2016
 
 ## I. Definition
