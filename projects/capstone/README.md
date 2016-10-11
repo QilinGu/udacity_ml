@@ -4,6 +4,8 @@
 Scott Penberthy  
 November 1, 2016
 
+_This is a work in progress, publishing by the end of October if I'm lucky_
+
 ## I. Definition
 
 ### Project Overview
