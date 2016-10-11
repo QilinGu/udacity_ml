@@ -113,7 +113,7 @@ Technically, Qmax is the maximum value seen by the neural network that's trying 
 for a Deep Q reinforcment learner, across all training examples, across time.
 
 We'll use the TensorBoard visualizer available with Tensorflow to see this QMax change over time.
-Our learning agent sits and observes for severa thousand iterations before learning.  Like Mom taught us, 
+Our learning agent sits and observes for several thousand iterations before learning.  Like Mom taught us, 
 it pays to listen and observe before making judgment!
 
 Tensorboard runs as a local Java application, serving web pages as its GUI on a local port.  This is Google, after all.
@@ -129,11 +129,8 @@ In [8]: for i in range(25000): ai.step()
 ```
 Now launch another terminal and ```cd``` to the repository directory, activating tensorflow
 as before.  You'll see new content in the
-log directory, though our filename will be different than mine, a combo of time and your local machine
-name.  Launch tensorboard and point to this directory.  The terminal will now show you log entries
-from their web server sitting on local port 6006.  I often let this terminal sit idle so that I can
-monitor activity.  When I try a new model, I often stop the application with control-c, then
-eliminate log files from the ```train`` directory, and restart.
+log directory.  Don't worry. Your log filename will be different than mine, a combo of time and your local machine
+name.  Launch tensorboard and point to this directory.  T
 ```
 % source activate tensorflow
 
@@ -146,6 +143,11 @@ Starting TensorBoard 23 on port 6006
 ```
 Launch your browser and navigate to http://0.0.00:6006.  You'll see two numbers we're tracking, loss and qmax.  Click
 on qmax.
+
+The separate terminal will now show you 
+Tensorboard server activity as it responds to browsers on local port 6006.  I often let this terminal sit idle so that I can
+monitor activity.  When I try a new model, I often stop the application with control-c, then
+eliminate log files from the ```train`` directory, and restart.
 
 
 ## II. Analysis
