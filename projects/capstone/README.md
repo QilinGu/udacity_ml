@@ -1,5 +1,8 @@
 # Self-driving Toy Cars with Tensorflow
-### Capstone Project, Machine Learning Engineer Nanodegree
+
+This project was submitted as part of the Capstone Project for 
+Sebastian Thrun's Machine Learning Engineer Nanodegree
+available on Udacity.
 
 Scott Penberthy  
 November 1, 2016
