@@ -104,7 +104,7 @@ In [6]: ai.g.step(2)
 
 
 ### Metrics
-We will evaluate our algorithm by tracking "Q max" in the learner.  More on this later.  For now, Qmax is essentially
+We will evaluate our algorithm by tracking "Q max" in the learner.  Qmax is essentially
 a measure of agent confidence.  As the agent learns, its better able to predict what action to take, leading to
 higher rewards.  The "Q" value tells the agent how much it believes a given state is worth in terms of 
 longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax.
@@ -144,11 +144,10 @@ Starting TensorBoard 23 on port 6006
 Launch your browser and navigate to http://0.0.00:6006.  You'll see two numbers we're tracking, loss and qmax.  Click
 on qmax.
 
-The separate terminal will now show you 
-Tensorboard server activity as it responds to browsers on local port 6006.  I often let this terminal sit idle so that I can
-monitor activity.  When I try a new model, I often stop the application with control-c, then
-eliminate log files from the ```train`` directory, and restart.
-
+The separate terminal now shows the live log data of the
+Tensorboard web server.  I often let this terminal sit idle to 
+monitor activity in a separate window.  When I try a new model, I often stop the application with control-c, then
+eliminate log files from the ```train`` directory, and restart.  Crude, yes.  Effective?  You bet.
 
 ## II. Analysis
 _(approx. 2-4 pages)_
