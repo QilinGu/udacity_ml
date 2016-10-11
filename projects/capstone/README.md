@@ -54,8 +54,9 @@ This has been successfully tested on a MacBook Pro running OS X El Capitan.  We 
 to test on other platforms!
 
 ### Running the code
-After successfully cloning this repository and installing all the pre-requisites, let's activate
-the TensorFlow environment in Python and launch iPython:
+After successfully cloning this repository and installing all the pre-requisites, ```cd``` to
+the repository directory so we have access to ```learning.py``` and ```carmunk.py```.  Let's activate
+the TensorFlow environment and launch an interactive python shell:
 
 ```
 % source activate tensorflow
