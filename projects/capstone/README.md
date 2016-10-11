@@ -104,13 +104,14 @@ In [6]: ai.g.step(2)
 
 
 ### Metrics
-We will evaluate our algorithm by tracking "Q max" in the learner.  Qmax is essentially
+We will evaluate our algorithm by tracking "Q max" in the learner.  
+
+Qmax is essentially
 a measure of agent confidence.  As the agent learns, its better able to predict what action to take, leading to
 higher rewards.  The "Q" value tells the agent how much it believes a given state is worth in terms of 
-longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax.
-
-Technically, Qmax is the maximum value seen by the neural network that's trying to estimate the Q function
-for a Deep Q reinforcment learner, across all training examples, across time.
+longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax. Technically, Qmax 
+is the maximum value seen by the neural network that's learning to estimate the Q function,
+across all training examples, across time.
 
 We'll use the TensorBoard visualizer available with Tensorflow to see this QMax change over time.
 Our learning agent sits and observes for several thousand iterations before learning.  Like Mom taught us, 
