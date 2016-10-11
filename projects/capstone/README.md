@@ -155,8 +155,8 @@ _(approx. 2-4 pages)_
 ### Data Exploration
 The simulator provides the following information about the car at every cycle:
 - 3 sensor readings from 0-40
-- x position, 0 far left, 1 far right
-- y position, 0 top, 1 bottom
+- x position, [0,1] where 0 is far left, 1 far right
+- y position, [0,1] where 0 is top, 1 bottom
 - theta, 0 to 2*pi
 
 You're allowed to take three actions:
