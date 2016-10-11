@@ -1,4 +1,6 @@
-# Self-driving Toy Cars with Tensorflow
+# Self-driving Cars with Tensorflow
+
+Toy cars, that is.  Virtual.  
 
 This project was submitted as my Capstone Project for 
 Sebastian Thrun's Machine Learning Engineer Nanodegree
