@@ -1,4 +1,4 @@
-# Self-driving toy cars with Tensorflow
+# Self-driving Toy Cars with Tensorflow
 ## Capstone Project
 ## Machine Learning Engineer Nanodegree
 
