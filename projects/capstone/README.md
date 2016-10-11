@@ -23,7 +23,10 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 ### Problem Statement
 ![fig1](https://cdn-images-1.medium.com/max/1200/1*K11fcwyorgnbTcl5dEnxVw.jpeg)
-The figure above represents a self-driving toy car scenario.  The car is shown in green, sensing the environment
+Your job is to write an AI for a toy car that learns how to drive by itself in a simulated
+environment.  
+
+The figure above captures our toy car scenario.  The car is shown in green, sensing the environment
 via three sonar sensors. Three slow-moving obstacles are shown in blue.  A cat darts around the
 environment in orange.   Our challenge is to build a learning algorithm that learns to drive
 without hitting things.  The car's throttle is stuck in the "on" position.  Hey, its a cheap toy.
