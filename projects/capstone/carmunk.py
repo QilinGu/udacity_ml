@@ -33,6 +33,7 @@ class GameState:
         height = self.game.height
         width = self.game.width
         thick = 1
+
         static = [
             pymunk.Segment(
                 self.space.static_body,
@@ -129,6 +130,10 @@ class GameState:
     def current(self):
         x, y = self.car_body.position
         readings = self.get_sonar_readings(x, y, self.car_body.angle)
+        # add x,y,theta
+        readings.append(x/self.game.width)
+        readings.append(y/self.game.height)
+        readings.append(self.car_body.angle)
         state = np.array(readings)
         return state
 
@@ -155,6 +160,7 @@ class GameState:
         if self.num_steps % 5 == 0:
             self.move_cat()
 
+        self.car_body.angle %= 2.0*math.pi
         driving_direction = Vec2d(1, 0).rotated(self.car_body.angle)
         self.car_body.velocity = 100 * self.game.scale * driving_direction
 
@@ -171,8 +177,10 @@ class GameState:
             self.recover_from_crash(driving_direction)
         else:
             # Higher readings are better, so return the sum.
+            # Reward based on the smallest sonar, e.g., having more clearance in general is better.
+            # we penalize cars that are too close to other things (6 clicks or less)
             terminal = False
-            reward = int(np.sum(readings)/10.0)
+            reward = np.min(readings[:3])-6.0 
         self.num_steps += 1
 
         return reward, readings, terminal
@@ -263,7 +271,7 @@ class GameState:
             # Check if we've hit something. Return the current i (distance)
             # if we did.
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
-                    or rotated_p[0] >= self.game.width or rotated_p[1] >= self.game.height:
+                  or rotated_p[0] >= self.game.width or rotated_p[1] >= self.game.height:
                 return i  # Sensor is off the screen.
             else:
                 obs = self.game.screen.get_at(rotated_p)
@@ -313,7 +321,6 @@ class Game:
         self.show_sensors = True
         self.draw_screen = True
         self.reset()
-
     def reset(self):
         self.state = GameState(self)
         self.total_reward = 0

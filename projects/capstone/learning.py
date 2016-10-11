@@ -6,15 +6,28 @@ import tensorflow as tf
 import numpy as np
 import random
 from carmunk import Game
+import pygame
+import math
 
 # Network parameters
 
+# 1. radar, position, theta and 8 frames of history
+# 2. radar, position, theta an no history
+# 3. radar, 16 frames of history
+#
+# We still haven't broken through to perfect performance or
+# tens of thousands of frames.
+
+n_hidden = [128] + [256]*14 + [128]
+
+"""
 n_hidden_1 = 128
 n_hidden_2 = 256
-n_hidden_3 = 128
+n_hidden_3 = 256
+"""
 
 n_min_epsilon = 0.01
-n_input = 3
+n_input = 6
 n_actions = 3
 n_gamma = 0.90
 n_observe = 6400
@@ -35,23 +48,24 @@ class SQN:
         self.summaries = None
         self.optim = None
         self.y_prime = None
+        w = []
+        b = []
         self.x = tf.placeholder("float", [None, n_input], name="X")
 
         # Store layers weight & bias, initialize with white noise near 0
-        self.weights = [['w1', [n_input, n_hidden_1]],
-                        ['w2', [n_hidden_1, n_hidden_2]],
-                        ['w3', [n_hidden_2, n_hidden_3]],
-                        ['w_out', [n_hidden_3, n_actions]]]
-        self.weights = self.make_vars(self.weights, track=track)
+        dims = [n_input]+n_hidden+[n_actions]
+        for i in range(len(dims)-1):
+            w += [['w'+str(i+1), dims[i:i+2]]]
+            b += [['b'+str(i+1), dims[i+1:i+2]]]
 
-        self.biases =  [['b1', [n_hidden_1]],
-                        ['b2', [n_hidden_2]],
-                        ['b3', [n_hidden_3]],
-                        ['b_out', [n_actions]]]
-        self.biases = self.make_vars(self.biases, constant=True, track=track)
+        print "weights", w, "biases", b
+        self.weights = self.make_vars(w, track=track)
+        self.biases = self.make_vars(b, constant=True, track=track)
         self.q_value = self.build_perceptron()
+        if track:
+            tf.histogram_summary(self.name + "/q_value", self.q_value)
         self.q_action = tf.argmax(self.q_value, dimension=1)
-        self.q_max = tf.Variable(0.0, name="q_max/"+name)
+        self.q_max = tf.Variable(0.0, name="q_max/" + name)
         self.q_max_val = 0.0
 
     def make_vars(self, spec, constant=False, track=False):
@@ -62,7 +76,7 @@ class SQN:
             else:
                 vars[name] = tf.Variable(tf.truncated_normal(shape, stddev=0.01), name=name)
             if track:
-                tf.histogram_summary(self.name+"/"+name, vars[name])
+                tf.histogram_summary(self.name + "/" + name, vars[name])
         return vars
 
     def copy_sqn(self, session, sqn):
@@ -72,16 +86,18 @@ class SQN:
             session.run(tf.assign(self.biases[key], sqn.biases[key]))
 
     def build_perceptron(self):
-        n = self.name
         w = self.weights
-        b = self.biases
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(self.x, w['w1']), b['b1']))
-        layer_1 = tf.nn.dropout(layer_1, 0.8)
-        layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1, w['w2']), b['b2']))
-        layer_2 = tf.nn.dropout(layer_2, 0.8)
-        layer_3 = tf.nn.relu(tf.add(tf.matmul(layer_2, w['w3']), b['b3']))
-        #layer_3 = tf.nn.dropout(layer_3, 0.8)
-        result = tf.add(tf.matmul(layer_3, w['w_out']), b['b_out'])
+        b = self.biases 
+        layers = [tf.nn.relu(tf.add(tf.matmul(self.x, w['w1']), b['b1']))]
+        for i in range(1, len(n_hidden)):
+            si = str(i+1)
+            print "\nlayer", si
+            print "weights", w['w'+si].get_shape().as_list()
+            print "bias", b['b'+si].get_shape().as_list()
+            layers[i-1] = tf.nn.dropout(layers[i-1], 0.8)
+            layers += [tf.nn.relu(tf.add(tf.matmul(layers[i-1], w['w'+str(i+1)]),b['b'+str(i+1)]))]
+        nth = str(len(n_hidden)+1)
+        result = tf.add(tf.matmul(layers[-1:][0], w['w'+nth]), b['b'+nth])
         return result
 
     def build_optimizer(self):
@@ -109,7 +125,7 @@ class SQN:
         dead_ends = np.stack(a[:,4])
         max_q_t1 = np.max(target_network.predict(session, X_t1), axis=1)*(1-dead_ends)
         self.q_max_val = max(np.max(max_q_t1), self.q_max_val)
-        y_prime = n_gamma * max_q_t1  + rewards
+        y_prime = rewards + n_gamma * max_q_t1
         inputs = {self.y_prime: y_prime,
                   self.action: actions,
                   self.q_max: self.q_max_val,
@@ -120,18 +136,21 @@ class SQN:
 # Construct model
 
 def prepare_frame(frame):
-    # frame is sonar1, sonar2, sonar3
-    # sonar ranges 1 to 40
+    # frame is sonar1, sonar2, sonar3, x, y, theta
+    # sonar ranges 0 to 40
+    # x and y range 0 to 1
+    # theta ranges 0 to two pi
     #
     # we want normalized values between 0 and 1
     #
-    return np.array(frame)/20.0
+    s1, s2, s3, x, y, theta = frame
+    return [s1/40.0, s2/40.0, s3/40.0, x, y, theta/(2*math.pi)]
 
 class Learner:
 
     def __init__(self):
         self.s = tf.Session()
-        self.q_train = SQN('q_train', track=True)
+        self.q_train = SQN('q_train', True)
         self.q_train.build_optimizer()
         self.q_target = SQN('q_target')
         self.games_played = 0
@@ -161,7 +180,6 @@ class Learner:
         self.replay = []
         self.losses = []
         self.games = []
-        self.best_q = -500
         self.q_t = None
         self.s_t = None
         self.a_t = None
@@ -192,7 +210,7 @@ class Learner:
 
             self.g.state.hud = str(self.g.total_reward)
         if self.epsilon > self.min_epsilon and self.t > n_observe:
-	    self.epsilon -= (1.0 - self.min_epsilon)/(n_explore*1.0)
+	       self.epsilon -= (1.0 - self.min_epsilon)/(n_explore*1.0)
 
     def act_and_observe(self):
         # take action, get reward, new frame
@@ -214,10 +232,18 @@ class Learner:
             self.g.state.num_steps = 0
             self.games_played += 1
 
+    def get_batch(self):
+        a = np.array(self.replay)
+        goofs = a[a[:,2] < 0]
+        oops = random.sample(goofs, min(len(goofs),n_batch_size/2))
+        yay = a[a[:,2] >= 0]
+        ok = random.sample(yay, min(n_batch_size - len(oops), len(yay)))
+        return np.concatenate((ok,oops))
+
     def learn_by_replay(self):
         if self.t > n_observe:
             self.learning_step += 1
-            summary, q_t, loss = self.q_train.learn(self.s, self.q_target, random.sample(self.replay, n_batch_size))
+            summary, q_t, loss = self.q_train.learn(self.s, self.q_target, self.get_batch())
             if (self.learning_step % 100) == 99:
                 self.log(summary)
                 self.losses.append(loss)
@@ -243,6 +269,14 @@ class Learner:
         not self.mute() or not self.mute()
         for i in range(n):
             self.step()
+
+    def debug(self):
+        ok = True
+        while ok:
+            self.step()
+            print self.t, self.q_t.tolist(), 'R=', self.r_t
+            pygame.event.get()
+            pygame.event.wait()
 
     def cycle(self, n=10):
         # 100k frames
