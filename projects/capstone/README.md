@@ -1,15 +1,23 @@
 # Capstone Project
 ## Machine Learning Engineer Nanodegree
-Joe Udacity  
-December 31st, 2050
+Scott Penberthy
+November 1, 2016
 
 ## I. Definition
-_(approx. 1-2 pages)_
 
 ### Project Overview
-In this section, look to provide a high-level overview of the project in layman’s terms. Questions to ask yourself when writing this section:
-- _Has an overview of the project been provided, such as the problem domain, project origin, and related datasets or input data?_
-- _Has enough background information been given so that an uninformed reader would understand the problem domain and following problem statement?_
+Self-driving cars are fascinating.  However, the learning curve is steep.  We noticed a lack of simple environments
+for experimenting with the underlying algorithms in pedagogical settings.  
+We have built one such environment here, which a programmer can run just fine on their own machine without GPUs.  
+
+Our virtual environment is a derivative of 
+[Matt Harvey's virtual car](https://medium.com/@harvitronix/using-reinforcement-learning-in-python-to-teach-a-virtual-car-to-avoid-obstacles-6e782cc7d4c6#.58wi2s7ct), 
+ported to work with Python 2.7 and PyGame 5.0.  The
+machine learning algorithm is based on 
+[Deep Q Reinforcement Learning](http://home.uchicago.edu/~arij/journalclub/papers/2015_Mnih_et_al.pdf), 
+without the "deep" part.  Many of the ideas
+were derived from [songotrek's Tensorflow implementation](https://github.com/songrotek/DQN-Atari-Tensorflow/blob/master/BrainDQN_Nature.py).
+
 
 ### Problem Statement
 In this section, you will want to clearly define the problem that you are trying to solve, including the strategy (outline of tasks) you will use to achieve the desired solution. You should also thoroughly discuss what the intended solution will be for this problem. Questions to ask yourself when writing this section:
