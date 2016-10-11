@@ -7,7 +7,7 @@ November 1, 2016
 
 ### Project Overview
 Self-driving cars are fascinating.  However, the learning curve is steep.  We noticed a lack of simple environments
-for experimenting with the underlying algorithms in pedagogical settings.  We have built one such environment here, which a programmer can run just fine without GPUs.  
+for experimenting with the underlying algorithms in pedagogical settings.  We have built one such environment here, which a programmer can run just fine _without_ expensive GPUs.  
 
 Our virtual environment is a derivative of 
 [Matt Harvey's virtual car](https://medium.com/@harvitronix/using-reinforcement-learning-in-python-to-teach-a-virtual-car-to-avoid-obstacles-6e782cc7d4c6#.58wi2s7ct), 
@@ -20,11 +20,35 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 ### Problem Statement
 ![fig1](https://cdn-images-1.medium.com/max/1200/1*K11fcwyorgnbTcl5dEnxVw.jpeg)
+The figure above represents a self-driving toy car scenario.  The car is shown in green, sensing the environment
+via three sonar sensors. Three slow-moving obstacles are shown in blue.  A cat darts around the
+environment in orange.   Our challenge is to build a learning algorithm that learns to drive
+without hitting things.  The car's throttle is stuck in the "on" position.  Hey, its a cheap toy.
 
-In this section, you will want to clearly define the problem that you are trying to solve, including the strategy (outline of tasks) you will use to achieve the desired solution. You should also thoroughly discuss what the intended solution will be for this problem. Questions to ask yourself when writing this section:
-- _Is the problem statement clearly defined? Will the reader understand what you are expecting to solve?_
-- _Have you thoroughly discussed how you will attempt to solve the problem?_
-- _Is an anticipated solution clearly defined? Will the reader understand what results you are looking for?_
+The simulator provides the following information about the car at every cycle:
+- 3 sensor readings from 0-40
+- x position, 0 far left, 1 far right
+- y position, 0 top, 1 bottom
+- theta, 0 to 2*pi
+
+You're allowed to take three actions:
+- 0, stay on course
+- 1, turn left by 0.2 radians
+- 2, turn right by 0.2 radians
+
+The simulator returns three values at each iteration:
+- Reward, an integer in [-100, 10] where negative values are bad, positive values are good
+- Terminal, a boolean indicating whether a crash has occurred
+
+### Prerequesites
+1. [Anaconda Python Distribution, 2.7](https://www.continuum.io/why-anaconda) for Python
+2. [Tensorflow for Anaconda](https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#anaconda-installation) for AI
+3. [PyGame](http://www.pygame.org/wiki/GettingStarted) for graphics
+4. [PyMunk](http://www.pymunk.org/en/latest/) for physics
+5. [Numpy](http://www.numpy.org/) for math
+
+This has been successfully tested on a MacBook Pro running OS X El Capitan.  We welcome contributors
+to test on other platforms!
 
 ### Metrics
 In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
