@@ -65,8 +65,8 @@ object?   -> Details about 'object', use 'object??' for extra details.
 In [1]: 
 ```
 
-Next, let's import our file then create our Deep Q learner with the test environment in 
-one line of code:
+Next, let's import our file then create our Deep Q learner environment in 
+one line of code!
 ```python
 In [1]: from learning import *
 
