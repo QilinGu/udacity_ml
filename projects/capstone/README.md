@@ -1,8 +1,8 @@
 # Self-driving Toy Cars with Tensorflow
 
-This project was submitted as part of the Capstone Project for 
+This project was submitted as my Capstone Project for 
 Sebastian Thrun's Machine Learning Engineer Nanodegree
-available on Udacity.
+on Udacity.
 
 Scott Penberthy  
 November 1, 2016
@@ -104,9 +104,48 @@ In [6]: ai.g.step(2)
 
 
 ### Metrics
-In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
-- _Are the metrics you’ve chosen to measure the performance of your models clearly discussed and defined?_
-- _Have you provided reasonable justification for the metrics chosen based on the problem and solution?_
+We will evaluate our algorithm by tracking "Q max" in the learner.  More on this later.  For now, Qmax is essentially
+a measure of agent confidence.  As the agent learns, its better able to predict what action to take, leading to
+higher rewards.  The "Q" value tells the agent how much it believes a given state is worth in terms of 
+longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax.
+
+Technically, Qmax is the maximum value seen by the neural network that's trying to estimate the Q function
+for a Deep Q reinforcment learner, across all training examples, across time.
+
+We'll use the TensorBoard visualizer available with Tensorflow to see this QMax change over time.
+Our learning agent sits and observes for severa thousand iterations before learning.  Like Mom taught us, 
+it pays to listen and observe before making judgment!
+
+Tensorboard runs as a local Java application, serving web pages as its GUI on a local port.  This is Google, after all.
+The visualizer reads log data from the "train" subdirectory and periodically updates the display as log data
+grows.  I find that periodically cleaning this directory is quite useful.
+
+To see this work, let's mute the graphic display and run 25,000 iterations:
+```python
+In [7]: ai.mute()
+True
+
+In [8]: for i in range(25000): ai.step()
+```
+Now launch another terminal and ```cd``` to the repository directory, activating tensorflow
+as before.  You'll see new content in the
+log directory, though our filename will be different than mine, a combo of time and your local machine
+name.  Launch tensorboard and point to this directory.  The terminal will now show you log entries
+from their web server sitting on local port 6006.  I often let this terminal sit idle so that I can
+monitor activity.  When I try a new model, I often stop the application with control-c, then
+eliminate log files from the ```train`` directory, and restart.
+```
+% source activate tensorflow
+
+(tensorflow) % ls train
+events.out.tfevents.1476194157.Scotts-MBP.home 
+
+(tensorflow) % tensorboard --logdir train
+Starting TensorBoard 23 on port 6006
+(You can navigate to http://0.0.0.0:6006)
+```
+Launch your browser and navigate to http://0.0.00:6006.  You'll see two numbers we're tracking, loss and qmax.  Click
+on qmax.
 
 
 ## II. Analysis
