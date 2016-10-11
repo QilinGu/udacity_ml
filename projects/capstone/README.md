@@ -28,22 +28,8 @@ via three sonar sensors. Three slow-moving obstacles are shown in blue.  A cat d
 environment in orange.   Our challenge is to build a learning algorithm that learns to drive
 without hitting things.  The car's throttle is stuck in the "on" position.  Hey, its a cheap toy.
 
-The simulator provides the following information about the car at every cycle:
-- 3 sensor readings from 0-40
-- x position, 0 far left, 1 far right
-- y position, 0 top, 1 bottom
-- theta, 0 to 2*pi
 
-You're allowed to take three actions:
-- 0, stay on course
-- 1, turn left by 0.2 radians
-- 2, turn right by 0.2 radians
-
-The simulator returns three values at each iteration:
-- Reward, an integer in [-100, 10] where negative values are bad, positive values are good
-- Terminal, a boolean indicating whether a crash has occurred
-
-### Prerequesites
+### Prerequisites
 1. [Anaconda Python Distribution, 2.7](https://www.continuum.io/why-anaconda) for Python
 2. [Tensorflow for Anaconda](https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#anaconda-installation) for AI
 3. [PyGame](http://www.pygame.org/wiki/GettingStarted) for graphics
@@ -80,16 +66,16 @@ In [1]: from learning import *
 In [2]: ai = Learner()
 ```
 
-At the time of this writing, you may see warning statements on a Mac about using outdated audio controls.  That's OK.  We don't
-need audio for this task.  The ```ai``` object is our Deep Q Learner, without the deep, controlling a simluated game ```g```
-analyzed by a Tensorflow environment ```s```.  Let's get into it.  Try the following to first demonstrate 1000 steps 
-and watch the car drive!  Since we're just getting started, epsilon learning kicks in and the actions are randomly chosen
-as we fill up experience memory.
+_[ed. At the time of this writing, you may see warning statements on a Mac about using outdated audio controls.  That's OK.  We don't
+need audio for this task.]_
+
+The ```ai``` object is our Deep Q Learner, without the deep, controlling a simluated game ```g```
+analyzed by a Tensorflow environment ```s```.  Let's get into it.  Try the following to first demo 1000 steps 
+and watch the car drive!  At this point the algorithm is purely random.
 
 ```python
 In [3]: ai.demo()
 ```
-
 You can try each step yourself, going straight, left or right.  You'll see three items returned,
 the reward, an array of sensor readings, and a boolean indicating whether you've hit a wall
 or object:
@@ -121,6 +107,21 @@ In this section, you will need to clearly define the metrics or calculations you
 _(approx. 2-4 pages)_
 
 ### Data Exploration
+The simulator provides the following information about the car at every cycle:
+- 3 sensor readings from 0-40
+- x position, 0 far left, 1 far right
+- y position, 0 top, 1 bottom
+- theta, 0 to 2*pi
+
+You're allowed to take three actions:
+- 0, stay on course
+- 1, turn left by 0.2 radians
+- 2, turn right by 0.2 radians
+
+The simulator returns three values at each iteration:
+- Reward, an integer in [-100, 10] where negative values are bad, positive values are good
+- Terminal, a boolean indicating whether a crash has occurred
+
 In this section, you will be expected to analyze the data you are using for the problem. This data can either be in the form of a dataset (or datasets), input data (or input files), or even an environment. The type of data should be thoroughly described and, if possible, have basic statistics and information presented (such as discussion of input features or defining characteristics about the input or environment). Any abnormalities or interesting qualities about the data that may need to be addressed have been identified (such as features that need to be transformed or the possibility of outliers). Questions to ask yourself when writing this section:
 - _If a dataset is present for this problem, have you thoroughly discussed certain features about the dataset? Has a data sample been provided to the reader?_
 - _If a dataset is present for this problem, are statistics about the dataset calculated and reported? Have any relevant results from this calculation been discussed?_
