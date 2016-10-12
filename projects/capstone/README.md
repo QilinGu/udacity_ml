@@ -182,11 +182,14 @@ Our challenge is to choose an action (0,1 or 2) at each time step.  We're only g
 a prior reward, and a boolean.  
 
 When we're driving free and clear, the reward varies over
-the interval [-4, 34] which represents the shortest distance record by a sonar sensor offset by -6.  Thus, if one
+the interval [-4, 34] which represents the shortest distance recorded by a sonar sensor
+offset by -6.  Thus, if one
 sensor has a reading of 2, the reward will be -4.  
 
 A crash occurs when a sensor reading of 1 senses an object, returning a reward of -100.  The simulator randomly shifts
-and rotates the car in an attempt to "get free" from the obstacle.
+and rotates the car in an attempt to "get free" from the obstacle. Think of this as an amygdala-driven safety
+reaction to danger, like a cat springing into the air at the sight of a cucumber.
+![Cat Cucumber](http://i.giphy.com/cYmGBt2TBiOCA.gif)
 
 The x and y position are floating point numbers varying from 0 to 1, indicating how far along each axis we sit.  The
 angle is measured in radians, varying from 0 to 2*Pi.  These measurements are a replacement for "SLAM" technology
