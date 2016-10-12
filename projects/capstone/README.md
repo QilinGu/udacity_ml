@@ -157,11 +157,11 @@ that computes yN = wN*x + bN.
 
 Here's how to read the chart.  
 
-Each slice in time (vertically) is a modified statistical box plot, which
+Each vertical slice in time is a modified statistical box plot, which
 shows the first and second standard deviations as a band of dark (1) and lighter (2) orange,
 with a faded orange for outliers.  When we plot these bands closely together
 and connect the regions, we get a flowing orange shape showing our distribution "on the side" as the
-means shifts over time. 
+statistical mean shifts over time. 
 
 ![TensorBoard](figures/tensorboard.png)
 
@@ -243,10 +243,52 @@ In [11]:
 ```
 
 ### Algorithms and Techniques
-In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
-- _Are the algorithms you will use, including any default variables/parameters in the project clearly defined?_
-- _Are the techniques to be used thoroughly discussed and justified?_
-- _Is it made clear how the input data or datasets will be handled by the algorithms and techniques chosen?_
+![Reinforcement Learning](figures/rel.png)
+
+This toy car scenario can be formalized by the diagram above.  We have an agent, the car, at the top of the diagram.  At a point
+in time t we must choose an action a_t.  This causes the agent to interact with environment, causing the state of the
+environment s_t+1 to change in the next time step t+1.  In addition the agent receives a perceived reward r_t.  The agent
+then considers the tuple (s_t, a_t, s_t+1, r_t) and decides upon the next action a_t+1.  This repeats ad nauseum.
+
+The machine learning literature calls this a _reinforcement learning_ problem.  Each action is "reinforced" through positive
+or negative "reward", getting us closer or farther away from a desired "state."  Let's define a function Q(s_t,a_t) as
+the expected, longterm reward of taking action a_t in state s_t.  How might we calculate this magical function Q?
+
+We can define this recursively as dynamic programming problem.  Q(s_t,a_t) becomes the reward r_t we receive 
+for taking action a_t, plus the _best_ reward available in the new state s_t+1.  The best reward is then
+the maximum Q(s_t+1, a_t+1) available in s_t+1.  The best action to take in a state is always the action a_t that
+has the highest Q value.  This leads to the Bellman equation:
+
+![Bellman equation](figures/bellman.png)
+
+This seems easy enough, but how do we pick initial Q values?  What's interesting is that, over infinite time, it doesn't
+really matter!  With infinite iterations of this algorithm the values of Q(s,t) will settle to an optimal plan.  Common
+practice starts with something reasonable, namely some white Gaussian noise around 0.
+
+Many implementations keep track of a "Q state table" which we update every cycle based on actions and observations.  This
+is fine for simple puzzles and games, but it quickly falls apart for domains with very large state sets.  The toy car example
+uses floating point numbers for the sensors, position and angle, and has an infinte state space.
+
+We replace the state table with a neural network.  We use the existing state s_t as the input values.  These are then
+fed through multiple hidden layers.  The output layer corresponds to a single neuron for each potential action, which
+in this case has 3 nodes.  The neural network then attempts to "learn" the state table by predicting the Q(s,a_i) values
+for all actions a_i given the state s as input.  Keeping in line with earlier observations about Q(s,t), we initialize
+the network with white noise.  The weights are Gaussian noise about 0, with a standard deviation of 0.01.  The biases
+are all positive, again at 0.01, shifting the solution space slightly away from 0.
+
+That's fine, but how what do we "train" this network?  Isn't that supervised learning, where we want the ultimate
+solution?
+
+This is the ingenius trick of the Deep Q Learning crowd.  They use _two_ copies of the neural network, one to train, and
+another to calculate the Q(s_t+1, a_t+1) "target" values.  The "training" network feeds not on the current actions, but on
+a sample of recent history called a "minibatch."  We calculate the maximum Q(s,t) values of the minibatch, then use
+this as the target value when adjusting weights in the training network.  We repeat until we've completely replaced
+the "recent history."  At that point in time we copy all the weights from the target network to the training network.
+
+The target network always drives actions in the simulator and updates the recent history.  We keep
+the training network "offline" to prevent thrashing as it prepares for the next update. If you look carefully at our QMax values from before, you'll notice a staircase effect as the values climb over time.  Each step up occurs when the smarter network 
+is copied to the training network.  Neat, huh?
+
 
 ### Benchmark
 In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
