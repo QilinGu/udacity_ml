@@ -271,7 +271,7 @@ practice starts with something reasonable, namely some white Gaussian noise arou
 
 Many implementations keep track of a "Q state table" which we update every cycle based on actions and observations.  This
 is fine for simple puzzles and games, but it quickly falls apart for domains with very large state sets.  The toy car example
-uses floating point numbers for the sensors, position and angle, and has an infinte state space.
+uses floating point numbers for the sensors, position and angle, and has an infinite state space.
 
 We replace the state table with a neural network.  We use the existing state s_t as the input values.  These are then
 fed through multiple hidden layers.  The output layer corresponds to a single neuron for each potential action, which
@@ -290,8 +290,8 @@ this as the target value when adjusting weights in the training network.  We rep
 the "recent history."  At that point in time we copy all the weights from the target network to the training network.
 
 The target network always drives actions in the simulator and updates the recent history.  We keep
-the training network "offline" to prevent thrashing as it prepares for the next update. If you look carefully at our QMax values from before, you'll notice a staircase effect as the values climb over time.  Each step up occurs when the smarter network 
-is copied to the training network.  Neat, huh?
+the training network "offline" to prevent thrashing as it prepares for the next update. If you look carefully at our QMax values from before, you'll notice a staircase effect as the values climb over time.  Each step up occurs when the smarter training network 
+is copied to the target network.  Neat, huh?
 
 
 ### Benchmark
