@@ -288,6 +288,15 @@ class Learner:
             pygame.event.get()
             pygame.event.wait()
 
+    def explore(self):
+        ok = True
+        while ok:
+            self.step()
+            print self.t, self.s_t.tolist(), 'R=', self.r_t
+            pygame.event.get()
+            pygame.event.wait()
+
+
     def cycle(self, n=10):
         # 100k frames
         self.mute() or self.mute()

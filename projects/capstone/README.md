@@ -196,10 +196,36 @@ getting close.
 
 ### Exploratory Visualization
 ![PyGame Racer v1](http://i.makeagif.com/media/10-12-2016/BksdP7.gif)
-In this section, you will need to provide some form of visualization that summarizes or extracts a relevant characteristic or feature about the data. The visualization should adequately support the data being used. Discuss why this visualization was chosen and how it is relevant. Questions to ask yourself when writing this section:
-- _Have you visualized a relevant characteristic or feature about the dataset or input data?_
-- _Is the visualization thoroughly analyzed and discussed?_
-- _If a plot is provided, are the axes, title, and datum clearly defined?_
+
+Here we see an animation of the environment where actions are chosen
+at random.  The green car moves and not that well.  Each time it collides with
+an object, wall, or cat, the screen blinks red.
+
+We can see this in slow motion, controlling it with our mouse and 
+terminating with control-C.  We flip the mute switch until it returns
+False, meaning that the display will be active.  We call the ```debug```
+method of our learning agent.  Each mouse or keyboard action
+advances the play, printing out the current time step, the six
+state values [s1, s2, s3, x, y, theta] and the reward R.
+```
+In [8]: ai.mute()
+Out[8]: True
+
+In [9]: ai.mute()
+Out[9]: False
+
+In [10]: ai.explore()
+11 [0.1, 0.675, 0.375, 0.19214722317827213, 0.2243449725383465, 0.14323944878270578] R= -3.0
+12 [0.075, 0.825, 0.375, 0.19979564505111702, 0.2335480823560278, 0.11140846016432673] R= -2.0
+13 [0.1, 0.9, 0.675, 0.20857147067002074, 0.24039701862180216, 0.07957747154594766] R= -3.0
+14 [0.075, 0.8, 0.35, 0.21621989254286564, 0.24960012843948348, 0.11140846016432673] R= -2.0
+15 [0.1, 0.875, 0.7, 0.2249957181617694, 0.2564490647052578, 0.07957747154594766] R= 10.0
+16 [0.575, 0.4, 0.4, 0.23454908305302546, 0.260670781943277, 0.04774648292756859] R= 6.0
+^C
+KeyboardInterrupt:
+
+In [11]: 
+```
 
 ### Algorithms and Techniques
 In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
