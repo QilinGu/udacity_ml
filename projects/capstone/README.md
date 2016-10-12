@@ -1,6 +1,5 @@
-# PacFLow
-# Pedagogical Autonomous Cars with TensorFlow
-## A Capstone Project
+# PacFlow
+## Pedagogical Autonomous Cars with TensorFlow
 
 This project was submitted in partial fulfillment
 of the Udacity Machine Learning Engineer Nanodegree.
