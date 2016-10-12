@@ -150,11 +150,17 @@ score. Loss represents the amount of error in a random sample of historical fram
 cycle.  QMax and Score are tracked over time, too.  Click to reveal or hide plots.
 
 If you're curious, click on the "histograms" tab to see our network weights and biases change over time
-as shown below. Here, each slice in time (vertically) is a modified statistical box plot, which
+as shown below. "q_train" refers to the training network that feeds on the memory of the last
+32,000 events.  A "bn" metric represents the bias values with "wN" weights value in neural network
+that computes yN = wN*x + bN.  
+
+Here's how to read the chart.  
+
+Each slice in time (vertically) is a modified statistical box plot, which
 shows the first and second standard deviations as a band of dark (1) and lighter (2) orange,
-with a faded orange for outliers (beyond 2 standard deviations).  When we plot these bands closely together
+with a faded orange for outliers.  When we plot these bands closely together
 and connect the regions, we get a flowing orange shape showing our distribution "on the side" as the
-means shifts over time.
+means shifts over time. 
 
 ![TensorBoard](figures/tensorboard.png)
 
