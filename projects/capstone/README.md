@@ -261,7 +261,7 @@ has the highest Q value.  This leads to the insightful, recursive Bellman equati
 
 ![Bellman equation](figures/bellman.png)
 
-Bellman defines a learning parameter, gamma, that tells us how much of our previous estimate of q(s,q)
+Bellman defines a learning parameter, gamma, that tells us how much of our previous estimate of q(s,a)
 we want to believe when updating values (from 0-100% or 0.0-1.0).  We want to learn slowly and deliberately, ironing out statistical
 outliers.  Gamma is often quite close to 1.0, or 0.9 in our case.
 
@@ -276,8 +276,12 @@ uses floating point numbers for the sensors, position and angle, and has an infi
 We replace the state table with a neural network.  We use the existing state s_t as the input values.  These are then
 fed through multiple hidden layers.  In our code, the number of nodes in each hidden layer are kept in an
 array ```n_hidden```.  The output layer corresponds to a single neuron for each potential action, which
-in this case yields 3 nodes.  The neural network then attempts to "learn" the state table by predicting the Q(s,a_i) values
-for all actions a_i given the state s as input.  Keeping in line with earlier observations about Q(s,t), we initialize
+in this case yields 3 nodes.  
+
+The neural network "learns" the Q state table by solving a non-linear regression, mapping an input state s
+to the numerical values for Q(s,a_i) for all actions a_i.  For our scenario, we have 6 input variables and 3 output
+variables.  Keeping in line with
+earlier observations about Q(s,t), we initialize
 the network with white noise.  The weights are Gaussian noise about 0, with a standard deviation of 0.01.  The biases
 are all positive, again at 0.01, shifting the solution space slightly away from 0.
 
@@ -287,7 +291,8 @@ solution?
 This is the ingenius trick of the Deep Q Learning crowd.  They use _two_ copies of the neural network, one to train, and
 another to calculate the Q(s_t+1, a_t+1) "target" values.  The "training" network feeds not on the current actions, but on
 a sample of recent history called a "minibatch."  We calculate the maximum Q(s,t) values of the minibatch, then use
-this as the target value when adjusting weights in the training network.  We repeat until we've completely refreshed
+this as the target value when adjusting weights in the training network (via gradient descent, minimizing the squared error
+between our predicted Q values and the target Q values).  We repeat until we've completely refreshed
 the recent history.  At that point in time we copy all the weights from the training network to the active, target network
 and repeat.
 
