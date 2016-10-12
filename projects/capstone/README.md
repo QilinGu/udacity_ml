@@ -254,15 +254,15 @@ The machine learning literature calls this a _reinforcement learning_ problem.  
 or negative "reward", getting us closer or farther away from a desired "state."  Let's define a function Q(s_t,a_t) as
 the expected, cumulative reward of taking action a_t in state s_t.  How might we calculate this magical function Q?
 
-We can define this recursively as dynamic programming problem.  Q(s_t,a_t) becomes the reward r_t we receive 
-for taking action a_t, plus the _best_ reward available in the new state s_t+1.  The best reward is then
+We can define this recursively as a dynamic programming problem.  Q(s_t,a_t) becomes the reward r_t we receive 
+for taking action a_t, plus the _best_ cumulative reward available in the new state s_t+1.  The best reward is then
 the maximum Q(s_t+1,a_t+1) available in s_t+1.  The best action to take in a state is always the action a_t that
-has the highest Q value.  This leads to the Bellman equation:
+has the highest Q value.  This leads to the insightful, recursive Bellman equation:
 
 ![Bellman equation](figures/bellman.png)
 
 Bellman defines a learning parameter, gamma, that tells us how much of our previous estimate of q(s,q)
-we want to believe when updating values (from 0-100%).  We want to learn slowly and deliberately, ironing out statistical
+we want to believe when updating values (from 0-100% or 0.0-1.0).  We want to learn slowly and deliberately, ironing out statistical
 outliers.  Gamma is often quite close to 1.0, or 0.9 in our case.
 
 This seems easy enough, but how do we pick initial Q values?  What's interesting is that, over infinite time, it doesn't
@@ -274,8 +274,9 @@ is fine for simple puzzles and games, but it quickly falls apart for domains wit
 uses floating point numbers for the sensors, position and angle, and has an infinite state space.
 
 We replace the state table with a neural network.  We use the existing state s_t as the input values.  These are then
-fed through multiple hidden layers.  The output layer corresponds to a single neuron for each potential action, which
-in this case has 3 nodes.  The neural network then attempts to "learn" the state table by predicting the Q(s,a_i) values
+fed through multiple hidden layers.  In our code, the number of nodes in each hidden layer are kept in an
+array ```n_hidden```.  The output layer corresponds to a single neuron for each potential action, which
+in this case yields 3 nodes.  The neural network then attempts to "learn" the state table by predicting the Q(s,a_i) values
 for all actions a_i given the state s as input.  Keeping in line with earlier observations about Q(s,t), we initialize
 the network with white noise.  The weights are Gaussian noise about 0, with a standard deviation of 0.01.  The biases
 are all positive, again at 0.01, shifting the solution space slightly away from 0.
@@ -286,18 +287,21 @@ solution?
 This is the ingenius trick of the Deep Q Learning crowd.  They use _two_ copies of the neural network, one to train, and
 another to calculate the Q(s_t+1, a_t+1) "target" values.  The "training" network feeds not on the current actions, but on
 a sample of recent history called a "minibatch."  We calculate the maximum Q(s,t) values of the minibatch, then use
-this as the target value when adjusting weights in the training network.  We repeat until we've completely replaced
-the "recent history."  At that point in time we copy all the weights from the target network to the training network.
+this as the target value when adjusting weights in the training network.  We repeat until we've completely refreshed
+the recent history.  At that point in time we copy all the weights from the training network to the active, target network
+and repeat.
 
-The target network always drives actions in the simulator and updates the recent history.  We keep
-the training network "offline" to prevent thrashing as it prepares for the next update. If you look carefully at our QMax values from before, you'll notice a staircase effect as the values climb over time.  Each step up occurs when the smarter training network 
+The target network drives actions in the simulator and updates the recent history.  We keep
+the training network "offline" to prevent thrashing. If you look carefully at our QMax values from before, you'll notice a staircase effect as the values climb over time.  Each step up occurs when the smarter training network 
 is copied to the target network.  Neat, huh?
 
 
 ### Benchmark
-In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
-- _Has some result or value been provided that acts as a benchmark for measuring performance?_
-- _Is it clear how this result or value was obtained (whether by data or by hypothesis)?_
+
+We want to ensure that our algorithm is doing better than random chance, using a repeatable test.  We accomplish this by
+running a "demo" of the agent after initializing the random number generator to the same constant k.  For our purposes,
+the maximum score appears to be ....
+
 
 
 ## III. Methodology
