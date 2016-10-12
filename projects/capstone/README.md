@@ -195,6 +195,7 @@ algorithm figures out to stay closer to the middle, to turn away from walls, and
 getting close.
 
 ### Exploratory Visualization
+![PyGame Racer v1](http://i.makeagif.com/media/10-12-2016/BksdP7.gif)
 In this section, you will need to provide some form of visualization that summarizes or extracts a relevant characteristic or feature about the data. The visualization should adequately support the data being used. Discuss why this visualization was chosen and how it is relevant. Questions to ask yourself when writing this section:
 - _Have you visualized a relevant characteristic or feature about the dataset or input data?_
 - _Is the visualization thoroughly analyzed and discussed?_
