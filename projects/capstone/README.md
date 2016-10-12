@@ -203,13 +203,14 @@ an object, wall, or cat, the screen blinks red.  The sensors are shown as
 white dots eminating from the car.  These are the lines used to detect
 the distance to objects.
 
-We can see this in slow motion, too, ontrolling it with our mouse and 
+We can see this in slow motion, too, controlling updates with our mouse
+movement and 
 terminating with control-C.  We flip the mute switch until it returns
 False, meaning that the display will be active.  We call the ```explore```
 method of our learning agent.  Each mouse or keyboard action
 advances the play, printing out the current time step, the six
-state values [s1, s2, s3, x, y, theta] and the reward R.  Clearly,
-the visual animation is easier to understand, while the numbers
+state values [s1, s2, s3, x, y, theta] and the reward R.  While
+the visual animation is easier to understand, the numbers
 give us a sense of the actual input to the learning algorithm.
 ```
 In [8]: ai.mute()
