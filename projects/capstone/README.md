@@ -27,13 +27,12 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 ### Problem Statement
 ![fig1](https://cdn-images-1.medium.com/max/1200/1*K11fcwyorgnbTcl5dEnxVw.jpeg)
-Your job is to write an AI for a simulated toy car that learns how to drive by itself.  
+Your job is to write an AI for a simulated toy car that learns to drive by itself.  
 
 The figure above captures our toy car scenario.  The car is shown in green, sensing the environment
 via three sonar sensors. Three slow-moving obstacles are shown in blue.  A cat darts around the
 environment in orange.   Our challenge is to build a learning algorithm that learns to drive
 without hitting things.  The car's throttle is stuck in the "on" position.  Hey, its a cheap toy.
-
 
 ### Prerequisites
 1. [Anaconda Python Distribution, 2.7](https://www.continuum.io/why-anaconda) for Python
@@ -146,9 +145,9 @@ Starting TensorBoard 23 on port 6006
 ```
 Launch your browser and navigate to http://0.0.00:6006.  You'll see three numbers we're tracking, loss, qmax and
 score. Loss represents the amount of error in a random sample of historical frames, taken every learning
-cycle.  QMax and Score as tracked over time, too.  Click to view each, all under the "events" tab.  
+cycle.  QMax and Score are tracked over time, too.  Click to reveal or hide plots.
 
-If you're curious, click on the "histograms" table to see the distributions of our weights and biases change over time.
+If you're curious, click on the "histograms" tab to see our network weights and biases change over time.
 Here, each slice in time (vertically) is a modified box plot, which
 shows the first and second standard deviations as a band of dark (1) and lighter (2) orange,
 with a faded orange for outliers (beyond 2 standard deviations).  When we plot these bands closely together
@@ -161,14 +160,13 @@ monitor activity in a separate window.  When I try a new model, I often stop the
 eliminate log files from the ```train`` directory, and restart.  Crude, yes.  Effective?  You bet.
 
 ## II. Analysis
-_(approx. 2-4 pages)_
 
 ### Data Exploration
 The simulator provides the following information about the car at every cycle:
-- 3 sensor readings from 0-40
-- x position, [0,1] where 0 is far left, 1 far right
-- y position, [0,1] where 0 is top, 1 bottom
-- theta, 0 to 2*pi
+- s1, s2, s3 - 3 sensor readings from 0-40
+- x - x position, [0,1] where 0 is far left, 1 far right
+- y - y position, [0,1] where 0 is top, 1 bottom
+- theta - the heading angle of the car, 0 to 2*pi
 
 You're allowed to take three actions:
 - 0, stay on course
@@ -180,11 +178,21 @@ each iteration:
 - Reward, an integer in [-100, 10] where negative values are bad, positive values are good
 - Terminal, a boolean indicating whether a crash has occurred
 
-In this section, you will be expected to analyze the data you are using for the problem. This data can either be in the form of a dataset (or datasets), input data (or input files), or even an environment. The type of data should be thoroughly described and, if possible, have basic statistics and information presented (such as discussion of input features or defining characteristics about the input or environment). Any abnormalities or interesting qualities about the data that may need to be addressed have been identified (such as features that need to be transformed or the possibility of outliers). Questions to ask yourself when writing this section:
-- _If a dataset is present for this problem, have you thoroughly discussed certain features about the dataset? Has a data sample been provided to the reader?_
-- _If a dataset is present for this problem, are statistics about the dataset calculated and reported? Have any relevant results from this calculation been discussed?_
-- _If a dataset is **not** present for this problem, has discussion been made about the input space or input data for your problem?_
-- _Are there any abnormalities or characteristics about the input space or dataset that need to be addressed? (categorical variables, missing values, outliers, etc.)_
+Our challenge is to choose an action (0,1 or 2) at each time step.  We're only given the state (s1,s2,s3,x,y,theta), 
+a prior reward, and a boolean.  
+
+When we're driving free and clear, the reward varies over
+the interval [-4, 34] which represents the shortest distance record by a sonar sensor offset by -6.  Thus, if one
+sensor has a reading of 2, the reward will be -4.  
+
+A crash occurs when a sensor reading of 1 senses an object, returning a reward of -100.  The simulator randomly shifts
+and rotates the car in an attempt to "get free" from the obstacle.
+
+The x and y position are floating point numbers varying from 0 to 1, indicating how far along each axis we sit.  The
+angle is measured in radians, varying from 0 to 2*Pi.  These measurements are a replacement for "SLAM" technology
+that simultaneously creates maps of the environment from richer sensor data.  The hope here is that the learning
+algorithm figures out to stay closer to the middle, to turn away from walls, and to avoid objects when they're 
+getting close.
 
 ### Exploratory Visualization
 In this section, you will need to provide some form of visualization that summarizes or extracts a relevant characteristic or feature about the data. The visualization should adequately support the data being used. Discuss why this visualization was chosen and how it is relevant. Questions to ask yourself when writing this section:

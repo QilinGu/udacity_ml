@@ -181,6 +181,7 @@ class Learner:
         self.s_t1 = None
         self.q_t1 = None
         self.terminal = False
+        self.test_mode = False
         # enable logging
         self.q_train.summaries = self.q_target.summaries = self.summaries = tf.merge_all_summaries()
         self.init = tf.initialize_all_variables()
@@ -239,6 +240,12 @@ class Learner:
         ok = random.sample(yay, min(n_batch_size - len(oops), len(yay)))
         return np.concatenate((ok,oops))
 
+    def show_epoch_stats(self):
+        if len(self.games):
+            print "Games played ", self.games_played
+            print "Epoch Max score", np.max(self.games)
+            print "Epoch Mean score", np.mean(self.games)
+
     def learn_by_replay(self):
         if self.t > n_observe:
             self.learning_step += 1
@@ -247,10 +254,7 @@ class Learner:
                 self.log(summary)
                 self.losses.append(loss)
             if (self.learning_step % n_network_update_frames) == 0:
-                if len(self.games):
-                    print "Games played ", self.games_played
-                    print "Epoch Max score", np.max(self.games)
-                    print "Epoch Mean score", np.mean(self.games)
+                self.show_epoch_stats()
                 self.games = []
                 self.q_target.copy_sqn(self.s, self.q_train)
 
@@ -261,13 +265,20 @@ class Learner:
         self.choose_action()
         self.act_and_observe()
         self.remember_for_later()
-        self.learn_by_replay()
+        if not self.test_mode:
+            self.learn_by_replay()
 
-    def demo(self, n=1000):
+    def demo(self, test=True, n=1000):
         # 1k frames
         not self.mute() or not self.mute()
+        if test:
+            self.test_mode = True
+            self.games = []
         for i in range(n):
             self.step()
+        if test:
+            self.test_mode = False
+            self.show_epoch_stats()
 
     def debug(self):
         ok = True
