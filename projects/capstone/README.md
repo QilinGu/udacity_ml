@@ -102,6 +102,8 @@ In [6]: ai.g.step(2)
 
 
 ### Metrics
+![QMax](figures/qmax.png)
+
 We will evaluate our algorithm by comparing its top score performance in
 1000 games against an agent that picks actions randomly.  That's all that 
 matters in the end -- bragging rights for the most number of iterations
@@ -117,6 +119,8 @@ across all training examples, across time.
 We'll use the TensorBoard visualizer available with Tensorflow to see our top score and QMax change over time.
 Our learning agent sits and observes for several thousand iterations before learning.  Like Mom taught us, 
 it pays to listen and observe before making judgment!
+
+![TensorBoard](figures/tensorboard.png)
 
 Tensorboard runs as a local Java application, serving web pages as its GUI on a local port.  This is Google, after all.
 The visualizer reads log data from the "train" subdirectory and periodically updates the display as log data
