@@ -189,7 +189,7 @@ sensor has a reading of 2, the reward will be -4.
 A crash occurs when a sensor reading of 1 senses an object, returning a reward of -100.  The simulator randomly shifts
 and rotates the car in an attempt to "get free" from the obstacle. Think of this as an amygdala-driven safety
 reaction to danger, like a cat springing into the air at the sight of a cucumber.
-![Cat Cucumber](https://media.giphy.com/media/cYmGBt2TBiOCA/giphy.gif)
+![Cat Cucumber](figures/cat.gif)
 
 The x and y position are floating point numbers varying from 0 to 1, indicating how far along each axis we sit.  The
 angle is measured in radians, varying from 0 to 2*Pi.  These measurements are a replacement for "SLAM" technology
