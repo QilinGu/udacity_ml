@@ -50,11 +50,11 @@ class SQN:
         # Store layers weight & bias, initialize with white noise near 0
         dims = [n_input]+n_hidden+[n_actions]
         for i in range(len(dims)-1):
-            w += [['w'+str(i+1), dims[i:i+2]]]
-            b += [['b'+str(i+1), dims[i+1:i+2]]]
+            _i = str(i+1)
+            w += [['w'+_i, dims[i:i+2]]]
+            b += [['b'+_i, dims[i+1:i+2]]]
         self.weights = self.make_vars(w, track=track)
         self.biases = self.make_vars(b, constant=True, track=track)
-
         self.q_value = self.build_perceptron()
         if track:
             tf.histogram_summary(self.name + "/q_value", self.q_value)
@@ -146,6 +146,9 @@ class Learner:
         self.q_target = SQN('q_target')
         self.games_played = 0
         self.min_epsilon = n_min_epsilon
+        self.score = tf.Variable(0.0, name="score")
+        self.score_val = 0.0
+        tf.scalar_summary('score', self.score)
         self.reset()
 
     def mute(self):
@@ -212,17 +215,22 @@ class Learner:
         self.frames = self.s_t1
         self.s_t1 = np.ravel(np.array(self.frames))
 
+    def track_top_score(self):
+        self.games.append(self.g.state.num_steps)
+        self.score_val = max(self.score_val, self.games[-1])
+        self.s.run(tf.assign(self.score, self.score_val))
+
     def remember_for_later(self):
 #        self.r_t = min(10,max(-10, self.r_t))
         self.replay.append([self.s_t, self.a_t, self.r_t, self.s_t1, self.terminal*1, np.max(self.q_t)])
         if (len(self.replay) > n_memory_size):
             self.replay.pop(0)
         if self.terminal:
-            self.games.append(self.g.state.num_steps)
+            self.track_top_score()
             self.g.total_reward = 0
             self.g.state.num_steps = 0
             self.games_played += 1
-
+            
     def get_batch(self):
         a = np.array(self.replay)
         goofs = a[a[:,2] < 0]
