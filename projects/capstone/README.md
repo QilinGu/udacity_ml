@@ -27,6 +27,7 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 ### Problem Statement
 ![fig1](figures/game.jpg)
+
 Your job is to write an AI for a simulated toy car that learns to drive by itself.  
 
 The figure above captures our toy car scenario.  The car is shown in green, sensing the environment
