@@ -109,7 +109,7 @@ We will evaluate our algorithm by comparing its top score performance in
 matters in the end -- bragging rights for the most number of iterations
 before a crash.  We need to do (much) better than random chance.
 
-We will track learning progress with "Q Max" from the Deep Q Learning paper. Qmax is essentially
+We will track learning progress with "Q Max" from the Deep Q Learning paper, as seen above. Qmax is essentially
 a measure of agent confidence.  As the agent learns, its better able to predict what action to take, leading to
 higher rewards.  The "Q" value tells the agent how much it believes a given state is worth in terms of 
 longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax. Technically, Qmax 
@@ -119,8 +119,6 @@ across all training examples, across time.
 We'll use the TensorBoard visualizer available with Tensorflow to see our top score and QMax change over time.
 Our learning agent sits and observes for several thousand iterations before learning.  Like Mom taught us, 
 it pays to listen and observe before making judgment!
-
-![TensorBoard](figures/tensorboard.png)
 
 Tensorboard runs as a local Java application, serving web pages as its GUI on a local port.  This is Google, after all.
 The visualizer reads log data from the "train" subdirectory and periodically updates the display as log data
@@ -151,12 +149,14 @@ Launch your browser and navigate to http://0.0.00:6006.  You'll see three number
 score. Loss represents the amount of error in a random sample of historical frames, taken every learning
 cycle.  QMax and Score are tracked over time, too.  Click to reveal or hide plots.
 
-If you're curious, click on the "histograms" tab to see our network weights and biases change over time.
-Here, each slice in time (vertically) is a modified box plot, which
+If you're curious, click on the "histograms" tab to see our network weights and biases change over time
+as shown below. Here, each slice in time (vertically) is a modified statistical box plot, which
 shows the first and second standard deviations as a band of dark (1) and lighter (2) orange,
 with a faded orange for outliers (beyond 2 standard deviations).  When we plot these bands closely together
 and connect the regions, we get a flowing orange shape showing our distribution "on the side" as the
 means shifts over time.
+
+![TensorBoard](figures/tensorboard.png)
 
 The separate terminal now shows the live log data of the
 Tensorboard web server.  I often let this terminal sit idle to 
