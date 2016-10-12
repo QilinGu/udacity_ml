@@ -26,7 +26,7 @@ were derived from [songotrek's Tensorflow implementation](https://github.com/son
 
 
 ### Problem Statement
-![fig1](https://cdn-images-1.medium.com/max/1200/1*K11fcwyorgnbTcl5dEnxVw.jpeg)
+![fig1](figures/game.jpg)
 Your job is to write an AI for a simulated toy car that learns to drive by itself.  
 
 The figure above captures our toy car scenario.  The car is shown in green, sensing the environment
@@ -163,11 +163,6 @@ and connect the regions, we get a flowing orange shape showing our distribution 
 means shifts over time. 
 
 ![TensorBoard](figures/tensorboard.png)
-
-The separate terminal now shows the live log data of the
-Tensorboard web server.  I often let this terminal sit idle to 
-monitor activity in a separate window.  When I try a new model, I often stop the application with control-c, then
-eliminate log files from the ```train`` directory, and restart.  Crude, yes.  Effective?  You bet.
 
 ## II. Analysis
 
