@@ -246,20 +246,24 @@ In [11]:
 ![Reinforcement Learning](figures/rel.png)
 
 This toy car scenario can be formalized by the diagram above.  We have an agent, the car, at the top of the diagram.  At a point
-in time t we must choose an action a_t.  This causes the agent to interact with environment, causing the state of the
+in time t we must choose an action a_t.  This agent interacts with environment, causing the state of the
 environment s_t+1 to change in the next time step t+1.  In addition the agent receives a perceived reward r_t.  The agent
 then considers the tuple (s_t, a_t, s_t+1, r_t) and decides upon the next action a_t+1.  This repeats ad nauseum.
 
 The machine learning literature calls this a _reinforcement learning_ problem.  Each action is "reinforced" through positive
 or negative "reward", getting us closer or farther away from a desired "state."  Let's define a function Q(s_t,a_t) as
-the expected, longterm reward of taking action a_t in state s_t.  How might we calculate this magical function Q?
+the expected, cumulative reward of taking action a_t in state s_t.  How might we calculate this magical function Q?
 
 We can define this recursively as dynamic programming problem.  Q(s_t,a_t) becomes the reward r_t we receive 
 for taking action a_t, plus the _best_ reward available in the new state s_t+1.  The best reward is then
-the maximum Q(s_t+1, a_t+1) available in s_t+1.  The best action to take in a state is always the action a_t that
+the maximum Q(s_t+1,a_t+1) available in s_t+1.  The best action to take in a state is always the action a_t that
 has the highest Q value.  This leads to the Bellman equation:
 
 ![Bellman equation](figures/bellman.png)
+
+Bellman defines a learning parameter, gamma, that tells us how much of our previous estimate of q(s,q)
+we want to believe when updating values (from 0-100%).  We want to learn slowly and deliberately, ironing out statistical
+outliers.  Gamma is often quite close to 1.0, or 0.9 in our case.
 
 This seems easy enough, but how do we pick initial Q values?  What's interesting is that, over infinite time, it doesn't
 really matter!  With infinite iterations of this algorithm the values of Q(s,t) will settle to an optimal plan.  Common
