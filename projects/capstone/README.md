@@ -351,30 +351,53 @@ Our implementation consists of two files.
 game so that it works properly with PyMunk 5.0 and Python 2.7.  We changed the negative reward for a crash
 from -500 to -100, then adding some basic functionality for tracking performance and debugging.
 
-```learning.py``` is an implementation of Deep Q reinforcement learning using local Tensorflow
-for computing feed-forward values and adjusting weights via back propagation.  We say "without the deep," as our network
+```learning.py``` is an implementation of Deep Q reinforcement learning using Tensorflow
+for building our neural network.  We say our implemenation is "without the deep," as our network
 is a simple, fully-connected network versus their deep convolutional network with hundreds of layers.  We
-are not operating from pixels.  We focus on a simpler, pedagogical problem of three sensors
-and simple game physics.
+are not operating from pixels, nor do we want to insist on an expensive GPU.
+Wee focus on a simpler, pedagogical problem of three sensors
+and toy game physics.
 
-Tensorflow has a python front-end where you first define all the input
+Tensorflow has a Python front-end where you first define all the input
 variables, the networks, and the output variables.  This forms a data pipeline, much like the graphics
 pipelines common in videogames.  When you "run" a network forward, Tensorflow interacts with
-a fast implementation in C and C++ and returns the values to Python.  This scales to larger networks by running
+a compiled implementation in C and C++ and returns the values to Python.  This scales to larger networks by running
 that same code in a distributed manner, where the intense computations can be run in the cloud, or soon
-in the cloud with hardware acceleration via TPUs and GPUs.  When we "run" the backpropagation backward, Tensorflow
+in the cloud with hardware acceleration via TPUs and GPUs.  When we "run" the backpropagation, Tensorflow
 performs the matrix determinants and multiplications with the C and C++ code, adjusting weights and returning values.
 
 Tensorboard is a visualizer for variables, weights, biases and more.  You'll see a rather peculiar trick, where we stuff the values
 for our maximum Q value and maximum Score from Python into Tensorflow on every iteration.  Tensorboard can only
-report on values stored in the C/C++ pipeline.  This took me a bit of time to figure out.
+report on values stored in the C/C++ pipeline.  We dump the results to the log file every 100 iterations
+to keep the log file sizes in check. This took me a bit of time to figure out.
 
 ### Refinement
-In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
-- _Has an initial solution been found and clearly reported?_
-- _Is the process of improvement clearly documented, such as what techniques were used?_
-- _Are intermediate and final solutions clearly reported as the process is improved?_
 
+We started with the best network ideas available online, namely a two-layer network.  This worked quite well, but we
+were frustrated that the car kept crashing.  We tried several tricks from the literature:
+
+- Like Deep Q, we initially stacked the last four (4) state readings into a single input.  This got us to 120 for QMax.
+- We increased the stacking to 16.  This got us to 140 Qmax, and seeemed to be the alltime winner.
+- We tried a shallow network with limited nodes (two layers of 32 nodes) and a single input.  This got us nowhere, often worse
+performance than random.  The interactions would seem random.  While we could see the entire picture of what was
+going on, the poor agent only had three feelers.  Its like feelings around in the dark with 3 poles.  Our agent was
+often surprised by the cat or a large object from behind, or backing into a wall.
+- We ran a grid search on a two-layer network, from 32 nodes to 512 nodes each.  The larger networks
+would take longer to train.  Yet, our top value for QMax wouldn't budge over 140, often ending up less.  We took the best
+network and let it run for 2 million iterations.  No joy.
+- We tried a smaller memory size and larger batch size.  The network would thrash, as documented
+in literature.  We needed a much larger memory (32,000 events) with a smaller batch size of 32.
+
+Finally, we wondered if going deep was the answer.  We created a narrow but 8-deep neural network, starting
+with 32 nodes, then 6 layers of 64 nodes, then a final layer of 32 nodes.  This quickly got to our magical
+140 and sat there for hundreds of thousands of iterations.  We let it run over the weekend.
+
+The network trained slowly, as though
+the intelligence was seeping in from the right.  We'd see the weights and biases of the farthest networks
+to the right change first, then slowly affect the early networks.  When those kicked in
+we saw a significant jump.  The narrow, deeper network had blasted through
+and was now achieving scores in the thousands with a Qmax nearly 10x the best grid iterations.  This one
+was a keeper.
 
 ## IV. Results
 _(approx. 2-3 pages)_
