@@ -353,8 +353,8 @@ from -500 to -100, then adding some basic functionality for tracking performance
 
 ```learning.py``` is an implementation of Deep Q reinforcement learning using local Tensorflow
 for computing feed-forward values and adjusting weights via back propagation.  We say "without the deep," as our network
-is a simple, fully-connected network versus their deep convolutional network with hundreds of layers.  
-We are not operating from pixels.  We focus on a simpler, pedagogical problem of three sensors
+is a simple, fully-connected network versus their deep convolutional network with hundreds of layers.  We
+are not operating from pixels.  We focus on a simpler, pedagogical problem of three sensors
 and simple game physics.
 
 Tensorflow has a python front-end where you first define all the input
