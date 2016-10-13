@@ -278,6 +278,8 @@ fed through multiple hidden layers.  In our code, the number of nodes in each hi
 array ```n_hidden```.  The output layer corresponds to a single neuron for each potential action, which
 in this case yields 3 nodes.  
 
+![Neural Network](figures/network.png)
+
 The neural network "learns" the Q state table by solving a non-linear regression, mapping an input state s
 to the numerical values for Q(s,a_i) for all actions a_i.  For our scenario, we have 6 input variables and 3 output
 variables.  Keeping in line with
@@ -308,11 +310,11 @@ the random generators to 0, then evaluate the agent by playing 1000 consecutive 
 a game is defined by 
 the number of frames before a crash occurs, at which point a game ends.  The car recovers like a cat
 jumping from a cucumber, then the next game begins.  We report basic statistics on the scores from
-the 1000 games. The score to beat is 192!
+the 1000 games. The score to beat is 192.
 
 |  Agent           | Top Score | Mean   | Stdev  | Low   |
 | ---------------- | --------: | -----: | -----: | -----:|
-| Random           | 192       | 27.6   | 23.7  |   1.0 |
+| Random           | 192       | 27.6   | 23.7   |   1.0 |
 
 
 ## III. Methodology
