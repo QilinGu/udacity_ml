@@ -273,12 +273,20 @@ Many implementations keep track of a "Q state table" which we update every cycle
 is fine for simple puzzles and games, but it quickly falls apart for domains with very large state sets.  The toy car example
 uses floating point numbers for the sensors, position and angle, and has an infinite state space.
 
-We replace the state table with a neural network.  We use the existing state s_t as the input values.  These are then
-fed through multiple hidden layers.  In our code, the number of nodes in each hidden layer are kept in an
-array ```n_hidden```.  The output layer corresponds to a single neuron for each potential action, which
-in this case yields 3 nodes.  
+We replace the state table with a neural network shown below.  We use the existing state s_t as the input values.  These are then
+fed through multiple hidden layers with nonlinear activation and dropout, followed by a final linear combination
+layer.  The output layer corresponds to a single neuron for each potential action, which
+in this case yields 3 nodes. 
 
 ![Neural Network](figures/network.png)
+
+In our code, the number of nodes in each hidden layer are kept in an
+array ```n_hidden```.  F  or example the code below specifies a network with a first layer of 64 neurons, 
+followed by 3 layers of 128 nodes each, then a final linear layer of 64 nodes:
+
+```python
+In [10]:  n_hidden =[64] + [128]*3 + [64]
+```
 
 The neural network "learns" the Q state table by solving a non-linear regression, mapping an input state s
 to the numerical values for Q(s,a_i) for all actions a_i.  For our scenario, we have 6 input variables and 3 output
