@@ -338,8 +338,8 @@ the angle would increase into the thousands of radians, sending our network into
 as biases would shift.  The modolu fixed that.  Sensor readings are scaled by 1/40.
 
 We explored scaling the rewards similarly, between -1.0 and 1.0.  This was done in the original deep Q learning
-paper so that various atari games were treated similarly.  Perhaps it was impatience, but we found
-that the network continued to explore and fail to learn much in the first million iterations.  The higher
+paper so that various Atari games were treated similarly.  Perhaps it was impatience, but we found
+that the network failed to learn much in the first million iterations.  The higher
 reward values made learning easier, as the reward "signal" stood out from the Gaussian noise embedded within
 the network.  With a smaller reward values, the Gaussian noise hid the signal and the network floundered.
 
