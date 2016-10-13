@@ -341,7 +341,7 @@ We explored scaling the rewards similarly, between -1.0 and 1.0.  This was done 
 paper so that various Atari games were treated similarly.  Perhaps it was impatience, but we found
 that the network failed to learn much in the first million iterations.  The higher
 reward values made learning easier, as the reward "signal" stood out from the Gaussian noise embedded within
-the network.  With a smaller reward values, the Gaussian noise hid the signal and the network floundered.
+the network.  With smaller reward values, the Gaussian noise hid the signal and the network floundered.
 
 ### Implementation
 
@@ -387,6 +387,9 @@ would take longer to train.  Yet, our top value for QMax wouldn't budge over 140
 network and let it run for 2 million iterations.  No joy.
 - We tried a smaller memory size and larger batch size.  The network would thrash, as documented
 in literature.  We needed a much larger memory (32,000 events) with a smaller batch size of 32.
+- We tried more sensors.  We added sensors to the back of the car.  We saw the agent learn faster, with
+fewer iterations.  Still, the car was crashing and the 140 QMax was not exceeded.  We needed a better
+internal representation of what was going on.  Two layers wasn't cutting it.
 
 Finally, we wondered if going deep was the answer.  We created a narrow but 8-deep neural network, starting
 with 32 nodes, then 6 layers of 64 nodes, then a final layer of 32 nodes.  This quickly got to our magical
