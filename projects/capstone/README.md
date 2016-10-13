@@ -281,7 +281,7 @@ in this case yields 3 nodes.
 ![Neural Network](figures/network.png)
 
 In our code, the number of nodes in each hidden layer are kept in an
-array ```n_hidden```.  F  or example the code below specifies a network with a first layer of 64 neurons, 
+array ```n_hidden```.  For example the code below specifies a network with a first layer of 64 neurons, 
 followed by 3 layers of 128 nodes each, then a final linear layer of 64 nodes:
 
 ```python
@@ -328,16 +328,44 @@ the 1000 games. The score to beat is 192.
 ## III. Methodology
 
 ### Data Preprocessing
-In this section, all of your preprocessing steps will need to be clearly documented, if any were necessary. From the previous section, any of the abnormalities or characteristics that you identified about the dataset will be addressed and corrected here. Questions to ask yourself when writing this section:
-- _If the algorithms chosen require preprocessing steps like feature selection or feature transformations, have they been properly documented?_
-- _Based on the **Data Exploration** section, if there were abnormalities or characteristics that needed to be addressed, have they been properly corrected?_
-- _If no preprocessing is needed, has it been made clear why?_
+
+We scale the input parameters so they all fall between 0 and 1, which prevents initial bias towards 
+parameters with larger absolute values.  The x,y position are left unchanged.  The angle theta is
+modulated by 2*pi, then scaled by 1/(2*Pi).  In earlier versions of the code we found that
+the angle would continue to increase often into the thousands, sending our network into a tailspin
+as biases would shift.  The modolu fixed that.  The sensors are scaled by 1/40.
+
+We explored scaling the rewards similarly, between -1.0 and 1.0.  This was done in the original deep Q learning
+paper so that various atari games were treated similarly.  Perhaps it was impatience, but we found
+that the network continued to explore and fail to learn much in the first million iterations.  The higher
+reward values made learning easier, as the reward "signal" stood out from the Gaussian noise embedded within
+the network.  With a smaller reward values, the Gaussian noise hid the signal and the network floundered.
 
 ### Implementation
-In this section, the process for which metrics, algorithms, and techniques that you implemented for the given data will need to be clearly documented. It should be abundantly clear how the implementation was carried out, and discussion should be made regarding any complications that occurred during this process. Questions to ask yourself when writing this section:
-- _Is it made clear how the algorithms and techniques were implemented with the given datasets or input data?_
-- _Were there any complications with the original metrics or techniques that required changing prior to acquiring a solution?_
-- _Was there any part of the coding process (e.g., writing complicated functions) that should be documented?_
+
+Our implementation consists of two files.  
+
+```carmunk.py``` is a port of the original CarMunk car driving
+game so that it works properly with PyMunk 5.0 and Python 2.7.  We changed the negative reward for a crash
+from -500 to -100, then adding some basic functionality for tracking performance and debugging.
+
+```learning.py``` is an implementation of Deep Q reinforcement learning using local Tensorflow
+for computing feed-forward values and adjusting weights via back propagation.  We say "without the deep," as our network
+is a simple, fully-connected network versus their deep convolutional network with hundreds of layers.  
+We are not operating from pixels.  We focus on a simpler, pedagogical problem of three sensors
+and simple game physics.
+
+Tensorflow has a python front-end where you first define all the input
+variables, the networks, and the output variables.  This forms a data pipeline, much like the graphics
+pipelines common in videogames.  When you "run" a network forward, Tensorflow interacts with
+a fast implementation in C and C++ and returns the values to Python.  This scales to larger networks by running
+that same code in a distributed manner, where the intense computations can be run in the cloud, or soon
+in the cloud with hardware acceleration via TPUs and GPUs.  When we "run" the backpropagation backward, Tensorflow
+performs the matrix determinants and multiplications with the C and C++ code, adjusting weights and returning values.
+
+Tensorboard is a visualizer for variables, weights, biases and more.  You'll see a rather peculiar trick, where we stuff the values
+for our maximum Q value and maximum Score from Python into Tensorflow on every iteration.  Tensorboard can only
+report on values stored in the C/C++ pipeline.  This took me a bit of time to figure out.
 
 ### Refinement
 In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
