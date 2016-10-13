@@ -307,9 +307,8 @@ We want to ensure that our algorithm is doing better than random chance.  We see
 the random generators to 0, then evaluate the agent by playing 1000 consecutive games.  The score of
 a game is defined by 
 the number of frames before a crash occurs, at which point a game ends.  The car recovers like a cat
-jumping from a cucumber, then the next game begins.  We report the top score, as well
-as the low, high, mean and standard deviation across 1000 games.  Below is our table for the algorithm that randomly chooses
-an action at every step.  The score to beat is 192!
+jumping from a cucumber, then the next game begins.  We report basic statistics on the scores from
+the 1000 games. The score to beat is 192!
 
 |  Agent           | Top Score | Mean   | Stdev  | Low   |
 | ---------------- | --------: | -----: | -----: | -----:|
@@ -317,7 +316,6 @@ an action at every step.  The score to beat is 192!
 
 
 ## III. Methodology
-_(approx. 3-5 pages)_
 
 ### Data Preprocessing
 In this section, all of your preprocessing steps will need to be clearly documented, if any were necessary. From the previous section, any of the abnormalities or characteristics that you identified about the dataset will be addressed and corrected here. Questions to ask yourself when writing this section:
