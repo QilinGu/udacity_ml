@@ -303,10 +303,13 @@ is copied to the target network.  Neat, huh?
 
 ### Benchmark
 
-We want to ensure that our algorithm is doing better than random chance, using a repeatable test.  We accomplish this by
-running a "demo" of the agent after initializing the random number generator to the same constant k.  For our purposes,
-the maximum score appears to be ....
+We want to ensure that our algorithm is doing better than random chance, using a repeatable test.  We seed all
+the random generators to 0, then evaluate the agent by playing consecutive games.  We report the top score, as well
+as the low, high, mean and standard deviation.  Below is our table for the algorithm that randomly chooses
+an action at every step.  The score to beat is 192.
 
+| Agent | Top Score | Mean | Stdev | Low |
+| Random | 192 | 27.6 | 23.7 | 1.0 |
 
 
 ## III. Methodology

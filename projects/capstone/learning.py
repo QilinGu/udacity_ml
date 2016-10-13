@@ -158,7 +158,7 @@ class Learner:
         return not toggle
 
     def start_logging(self):
-        self.train_writer = tf.train.SummaryWriter('./train', self.s.graph)
+        self.train_writer = tf.train.SummaryWriter('./baseline', self.s.graph)
 
     def stop_logging(self):
         self.train_writer.close()
@@ -182,6 +182,7 @@ class Learner:
         self.q_t1 = None
         self.terminal = False
         self.test_mode = False
+        self.baseline = False
         # enable logging
         self.q_train.summaries = self.q_target.summaries = self.summaries = tf.merge_all_summaries()
         self.init = tf.initialize_all_variables()
@@ -197,12 +198,11 @@ class Learner:
 
     def choose_action(self):
         # choose an action
-        if random.random() < self.epsilon or self.t < n_observe:
+        if self.baseline or random.random() < self.epsilon or self.t < n_observe:
             self.a_t = np.random.randint(0,3)
             self.g.state.hud = "*"+str(self.g.total_reward)
         else:
             self.a_t = self.q_t.argmax() # best action index
-
             self.g.state.hud = str(self.g.total_reward)
         if self.epsilon > self.min_epsilon and self.t > n_observe:
 	       self.epsilon -= (1.0 - self.min_epsilon)/(n_explore*1.0)
@@ -255,7 +255,8 @@ class Learner:
                 self.losses.append(loss)
             if (self.learning_step % n_network_update_frames) == 0:
                 self.show_epoch_stats()
-                self.games = []
+                if not self.test_mode:
+                    self.games = []
                 self.q_target.copy_sqn(self.s, self.q_train)
 
     def step(self):
@@ -295,6 +296,33 @@ class Learner:
             print self.t, self.s_t.tolist(), 'R=', self.r_t
             pygame.event.get()
             pygame.event.wait()
+
+    def evaluate(self):
+        self.games_played = 0
+        random.seed(0)
+        np.random.seed(seed=0)
+        tf.set_random_seed(0)
+        self.reset()
+        self.games = []
+        self.test_mode = True
+        while not self.mute():
+            pass
+        while self.games_played < 1000:
+            self.step()
+            if (self.games_played > 0) and (self.t % 1000 == 0):
+                print self.games_played, "games played with top score", np.max(self.games)
+        self.test_mode = False
+        a = np.array(self.games)
+        std1 = np.std(a)
+        mean = np.mean(a)
+        low = np.min(a)
+        hi = np.max(a)
+        print "Mean score:", mean
+        print "Std dev:", std1
+        print "Low:", low
+        print "Hi:", hi
+        self.test_mode = False
+        self.reset()
 
 
     def cycle(self, n=10):
