@@ -304,9 +304,12 @@ is copied to the target network.  Neat, huh?
 ### Benchmark
 
 We want to ensure that our algorithm is doing better than random chance, using a repeatable test.  We seed all
-the random generators to 0, then evaluate the agent by playing consecutive games.  We report the top score, as well
-as the low, high, mean and standard deviation.  Below is our table for the algorithm that randomly chooses
-an action at every step.  The score to beat is 192.
+the random generators to 0, then evaluate the agent by playing 1000 consecutive games.  The score of
+a game is defined by 
+the number of frames before a crash occurs, at which point a game ends.  The car recovers like a cat
+jumping from a cucumber, then the next game begins.  We report the top score, as well
+as the low, high, mean and standard deviation across 1000 games.  Below is our table for the algorithm that randomly chooses
+an action at every step.  The score to beat is 192!
 
 |  Agent           | Top Score | Mean   | Stdev  | Low   |
 | ---------------- | --------: | -----: | -----: | -----:|
