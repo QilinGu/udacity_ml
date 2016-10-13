@@ -332,9 +332,9 @@ the 1000 games. The score to beat is 192.
 We normalize input parameters so they all fall between 0 and 1.  This prevents 
 bias towards parameters with larger absolute values.  
 
-The x,y position are left unchanged.  The angle theta is
+The x,y positions are left unchanged.  The angle theta is
 modulated by 2 Pi, then scaled by 1/(2 Pi).  In earlier versions of the code we found that
-the angle would continue to increase often into the thousands, sending our network into a tailspin
+the angle would increase into the thousands of radians, sending our network into a tailspin
 as biases would shift.  The modolu fixed that.  Sensor readings are scaled by 1/40.
 
 We explored scaling the rewards similarly, between -1.0 and 1.0.  This was done in the original deep Q learning
