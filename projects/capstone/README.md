@@ -303,7 +303,7 @@ is copied to the target network.  Neat, huh?
 
 ### Benchmark
 
-We want to ensure that our algorithm is doing better than random chance, using a repeatable test.  We seed all
+We want to ensure that our algorithm is doing better than random chance.  We seed all
 the random generators to 0, then evaluate the agent by playing 1000 consecutive games.  The score of
 a game is defined by 
 the number of frames before a crash occurs, at which point a game ends.  The car recovers like a cat
