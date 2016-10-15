@@ -483,20 +483,30 @@ We also need better control of the car.  Having the throttle on full is dangerou
 need braking, stopping, starting and acceleration, as well as more nuanced control of the driving direction.
 
 ### Justification
-In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
-- _Are the final results found stronger than the benchmark result reported earlier?_
-- _Have you thoroughly analyzed and discussed the final solution?_
-- _Is the final solution significant enough to have solved the problem?_
+The final model achieved a peak performance that was 86.2 standard deviations greater 
+than the peak performance of the random agent, a clear outlier.  Our final model delivered a mean
+performance in the 95th percentile of the random agent, 3.06 standard deviations above
+the mean.
+
+Our final model had a performance distribution that skewed right, with a standard deviation of 220.8 
+and a mean of 100.   When crashes occur, they seem to occur early.  This is consistent with
+our observation that crashes often happen in clusters upon recovery, delivering many short games.
+The "smarter" agent was able to keep many games going much longer, into the thousands of frames.
+The learning was achieved after an initial plateau.  We found that, indeed, the deeper models
+performed better than the shallow, 2-layer models.  This pedagogical example, however, has 
+poor information and weak controls.
 
 
 ## V. Conclusion
-_(approx. 1-2 pages)_
 
-### Free-Form Visualization
-In this section, you will need to provide some form of visualization that emphasizes an important quality about the project. It is much more free-form, but should reasonably support a significant result or characteristic about the problem that you want to discuss. Questions to ask yourself when writing this section:
-- _Have you visualized a relevant or important quality about the problem, dataset, input data, or results?_
-- _Is the visualization thoroughly analyzed and discussed?_
-- _If a plot is provided, are the axes, title, and datum clearly defined?_
+Our original goal of creating a simple environment for exploring autonomous vehicles in
+Tensorflow was achieved.  We have
+- created a reinforcement learning agent
+- implemented a simplified version of Deep Q learning in Python and Tensorflow
+- demonstrated shallow vs. deeper networks and their capability
+- leveraged Tensorflow for visualization and computation
+- leveraged a gaming environment for live visualization
+- exposed problem areas in autonomous vehicles, seeing a need for maps and SLAM.
 
 ### Reflection
 In this section, you will summarize the entire end-to-end problem solution and discuss one or two particular aspects of the project you found interesting or difficult. You are expected to reflect on the project as a whole to show that you have a firm understanding of the entire process employed in your work. Questions to ask yourself when writing this section:
