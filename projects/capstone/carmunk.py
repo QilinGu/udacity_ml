@@ -1,6 +1,12 @@
 #
 # Carmunk ported to PyMunk 5.0
 #
+# Original code
+# https://github.com/harvitronix/reinforcement-learning-car/blob/master/flat_game/carmunk.py
+#
+# @scottpenberthy
+# October, 2016
+#
 
 import random
 import math
@@ -68,6 +74,7 @@ class GameState:
         self.show_hud()
 
     def show_hud(self):
+        # Show a simple head-up display in the far corner
         font = pygame.font.Font(None, 24)
         survivedtext = font.render(self.hud.zfill(2), True, (255, 255, 255))
         textRect = survivedtext.get_rect()
@@ -75,6 +82,7 @@ class GameState:
         self.game.screen.blit(survivedtext, textRect)
 
     def create_obstacle(self, x, y, r):
+        # Create a body in PyMunk to represent a big, heavy obstacle
         c_body = pymunk.Body(1000000, 1000000) # was pymunk.inf
         c_shape = pymunk.Circle(c_body, r*self.game.scale)
         c_shape.elasticity = 1.0
@@ -84,6 +92,7 @@ class GameState:
         return c_body
 
     def create_cat(self):
+        # Create a lighter body in PyMunk to represent a fast moving cat
         inertia = pymunk.moment_for_circle(1, 0, 14*self.game.scale, (0, 0))
         self.cat_body = pymunk.Body(1, inertia)
         self.cat_body.position = 50*self.game.scale, self.game.height - 100*self.game.scale
@@ -108,24 +117,6 @@ class GameState:
         driving_direction = Vec2d(1, 0).rotated(self.car_body.angle)
         self.car_body.apply_impulse_at_local_point(driving_direction)
         self.space.add(self.car_body, self.car_shape)
-
-    def goal_distance(self):
-        return (self.goal_body.position-self.car_body.position).get_length()
-
-    def best_action(self):
-        # see angle to our goal
-        theta = ((self.goal_body.position-self.car_body.position).get_angle())%(2*math.pi)
-        dtheta = theta-(self.car_body.angle % (2*math.pi))
-        if dtheta > math.pi:
-           # its shorter to turn the other way versus whirl around
-           dtheta = dtheta - 2.0*math.pi
-        if dtheta > 0.2:
-           action = 2 # turn right
-        elif dtheta < -0.2:
-           action = 1 # turn left
-        else:
-           action = 0 # on target
-        return action
 
     def current(self):
         x, y = self.car_body.position
@@ -193,6 +184,7 @@ class GameState:
             obstacle.velocity = speed * direction
 
     def move_cat(self):
+        # zip saround
         speed = self.game.scale*random.randint(20, 200)
         self.cat_body.angle -= random.randint(-1, 1)
         direction = Vec2d(1, 0).rotated(self.cat_body.angle)

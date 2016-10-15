@@ -1,6 +1,9 @@
 #
 # Reinforcement learning agent for the "driverless car" using Tensorflow
 #
+# @scottpenberthy
+# November 1, 2016
+#
 
 import tensorflow as tf
 import numpy as np
@@ -10,15 +13,6 @@ import pygame
 import math
 
 # Network parameters
-
-# 1. radar, position, theta and 8 frames of history
-# 2. radar, position, theta and no history
-# 3. [128, 256, 256, 256, 256, 128]
-# 3. radar, 16 frames of history
-#
-#
-# We still haven't broken through to perfect performance or
-# tens of thousands of frames.
 
 n_hidden = [32] + [64]*6 + [32]
 n_min_epsilon = 0.01
@@ -38,7 +32,6 @@ class SQN:
     # Shallow Q-Learning network, as opposed to "deep"
     
     def __init__(self, name='q_value', track=False):
-        # Tf graph input
         self.name = name
         self.summaries = None
         self.optim = None
@@ -63,6 +56,12 @@ class SQN:
         self.q_max_val = 0.0
 
     def make_vars(self, spec, constant=False, track=False):
+        # Create "variables" in Tensorflow that we'll later
+        # assign to values.   We use this handy routine
+        # for creating our weights and biases.  We need to pull
+        # them out as variables to allow for copying from
+        # our smarter, training network to the operational, 
+        # target network every n_network_update_frames frames.
         vars = {}
         for name, shape in spec:
             if constant:
@@ -74,12 +73,23 @@ class SQN:
         return vars
 
     def copy_sqn(self, session, sqn):
+        #
+        # Load our weights and biaes from the trained network to the operational
+        # target network.  We do this with an tensorflow assignment. 
+        #
         for key in self.weights.keys():
             session.run(tf.assign(self.weights[key], sqn.weights[key]))
         for key in self.biases.keys():
             session.run(tf.assign(self.biases[key], sqn.biases[key]))
 
     def build_perceptron(self):
+        #
+        # Build a fully connected network whose output computes a regression.
+        # The hidden layers all use a 20% dropout filter and a nonliner rectifier
+        # for activation.  The final layer uses a linear combination to feed
+        # the final layer output.  We store the weights and biases using 
+        # a naming convention of wi and bi for layer i.
+        #
         w = self.weights
         b = self.biases 
         layers = [tf.nn.relu(tf.add(tf.matmul(self.x, w['w1']), b['b1']))]
@@ -92,6 +102,20 @@ class SQN:
         return result
 
     def build_optimizer(self):
+        #
+        # Build our back propogation step.  We optimize by minimizing
+        # squared error between our target prediction for Q() and what
+        # our training network is currently predicting for Q().
+        #
+        # This implements Bellman's equation
+        #
+        # Q*(s,a) = Rt + gamma * Max(Q(s',a'))
+        #
+        # When we take action a in state s, our expected longterm reward
+        # is the reward we receive for that first action a, then the
+        # maximum longterm reward available to us in the new state s',
+        # from all actions a' we could take in s'.
+        #
         self.y_prime = tf.placeholder('float32', [None], name='y_prime')
         self.action = tf.placeholder('int32', [None], name='action')
         action_one_hot = tf.one_hot(self.action, n_actions, 1.0, 0.0)
@@ -102,12 +126,21 @@ class SQN:
         self.optim = tf.train.RMSPropOptimizer(0.00025,0.99,0.0,1e-6).minimize(self.loss)
 
     def predict(self, session, states):
+        #
+        # Feed forward a set of states through our network and
+        # extract the predicted Q values.  Note that we also use the trick
+        # of tracking a Python variable across network evaluations by 
+        # jamming it into the state at every iteration (self.q_max).
+        #
         feed = {self.x: states, self.q_max: self.q_max_val}
         qv = session.run(self.q_value, feed_dict=feed)
         self.q_max_val = max(np.max(qv), self.q_max_val)
         return qv
 
     def learn(self, session, target_network, samples):
+        #
+        # Perform a back-propagation.
+        #
         a = np.array(samples)
         X = np.stack(a[:,0])
         actions = np.stack(a[:,1])
@@ -140,6 +173,15 @@ def prepare_frame(frame):
 
 class Learner:
 
+    # This is our reinforcement learner that uses
+    # two SQN networks to update Q values.
+    # 
+    # We first wait and take random actions for
+    # n_observe frames.  This helps us fill up 
+    # our event memory.  Next, we continue to take
+    # random actions as we gradually anneal self.epsilon
+    # down to self.min_epsilon over n_explore frames.
+
     def __init__(self, plotting_only=False):
         self.s = tf.Session()
         self.q_train = SQN('q_train', True)
@@ -153,18 +195,28 @@ class Learner:
         self.reset(plotting_only)
 
     def mute(self):
+        # Toggle the visual display on or off for performance reasons.
         toggle = not self.g.draw_screen
         self.g.draw_screen = toggle
         self.g.show_sensors = toggle
         return not toggle
 
     def start_logging(self):
-        self.train_writer = tf.train.SummaryWriter('./baseline', self.s.graph)
+        #
+        # This is how we log information for use in Tensorboard.  
+        #
+        self.train_writer = tf.train.SummaryWriter('./train', self.s.graph)
 
     def stop_logging(self):
+        # This flushes whatever remains in memory to disk for Tensorboard.
         self.train_writer.close()
 
     def log(self, summary):
+        # This updates the logfile with output from the latest
+        # iteration, which Tensorboard calls a "summary". 
+        # 
+        # Not to be confused with a "shrubbery."
+        #
         self.train_writer.add_summary(summary, self.t)
 
     def init_common(self):
@@ -187,12 +239,21 @@ class Learner:
         self.q_train.summaries = self.q_target.summaries = self.summaries = tf.merge_all_summaries()
 
     def init_for_training(self):
+        #
+        # This is kind of bogus, but I had to tease out
+        # init conditions for when we want to train with
+        # null values, epsilon, and the works.
+        #
         self.epsilon = 1.0
         self.init = tf.initialize_all_variables()
         self.s.run(self.init)
 
     def init_for_testing(self):
-        # play through without randomness
+        # 
+        # Here we squash the learner hyperparameters
+        # to force our agent to use its own prediction
+        # at every iteration.
+        #
         self.baseline = False
         self.epsilon = 0
         self.learning_step = 0

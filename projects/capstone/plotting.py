@@ -1,6 +1,9 @@
 #
 # Reinforcement learning agent for the "driverless car" using Tensorflow
 #
+# @scottpenberthy
+# October, 2016
+#
 
 import tensorflow as tf
 import numpy as np
@@ -14,7 +17,20 @@ from scipy.signal import convolve2d
 
 class Plotter:
 
-    # Shallow Q-Learning network, as opposed to "deep"
+    # We put some plotting routines here that
+    # we used to document performance of our
+    # final model.
+    #
+    # These fight with PyGame for control of the
+    # matplot environment. As a result, you should
+    # load these separately, as follows:
+    #
+    # from plotting import *
+    #
+    # p.contour_plot()
+    # p.angle_v_sensor_plot()
+    # p.theta_anim()
+    # p.sensor_anim() 
     
     def __init__(self, name='q_value', track=False):
         # Tf graph input
@@ -44,14 +60,24 @@ class Plotter:
         return convolve2d(data, window, mode='same', boundary='symm')
 
     def location_contours(self, sensors=[0.2,0.2,0.2,0.0]):
+        #
+        # Create a mesh grid for 100x100 points within the simulated game.
+        # Store the maximum Q value at each (x,y) location using the
+        # fixed sensor values and car angle (theta) passed into this function.
+        # 
         x = np.arange(0,1,0.01)
         y = np.arange(0,1,0.01)
         qt = self.ai.q_train
         a,b = np.meshgrid(x,y)
         s1,s2,s3,theta = sensors
+        # this hairball creates an entry in our matrix, storing the
+        # sensor readings, x,y, and theta in the proper order
+        # for evaluating through our network.
         X = np.concatenate([[[s1, s2, s3, a[:,i][j], b[:,i][j], theta] for i in range(len(a[0]))] for j in range(len(a))])
         feed = {qt.x: X, qt.q_max: qt.q_max_val}
+        # use the maximum q value here..
         q = self.ai.s.run(tf.reduce_max(qt.q_value, reduction_indices=[1]), feed_dict=feed)
+        # or uncomment and use the chosen action here
         #q = self.ai.s.run(tf.argmax(qt.q_value, dimension=1), feed_dict=feed)
         cols = len(a[0])
         rows = len(a)
@@ -61,12 +87,22 @@ class Plotter:
         return a,b,c
 
     def angle_v_sensor_contours(self, x0=0.5, y0=0.5):
+        #
+        # Create a mesh grid of 100x100 varying from 0-1 on both axes.
+        # Treat the x axis as the angle of the car
+        # Treat the y axis as the sensor level for all 3 sensors
+        # Compute the maximum Q value at a fixed position x0,y0 as supplied,
+        # varying angle and sensor level across the grid.
+        # 
         # x axis varies theta from 0 to 2*pi
         # y axis varies sensors all from 0 to 1.0 in unison
+        #
         x = np.arange(0,1,0.01)
         y = np.arange(0,1,0.01)
         qt = self.ai.q_train
         a,b = np.meshgrid(x,y)
+        # this is the ugly hairbal that does the bulk of the work
+        # populating our state values for pushing through the neural network.
         X = np.concatenate([[[b[:,i][j], b[:,i][j], b[:,i][j], x0, y0, 2*np.pi*a[:,i][j]] for i in range(len(a[0]))] for j in range(len(a))])
         feed = {qt.x: X, qt.q_max: qt.q_max_val}
         q = self.ai.s.run(tf.reduce_max(qt.q_value, reduction_indices=[1]), feed_dict=feed)
@@ -79,6 +115,10 @@ class Plotter:
         return a,b,c
 
     def contour_plot(self, sensors=[0.2,0.2,0.2,0.0], title="Contour Plot of Q(s,a)"):
+        #
+        # Show a contour plot of how Q varies over the geometry of our
+        # play area, while fixing sensor readings and car rotation.
+        #
         x,y,z = self.location_contours(sensors)
         plt.figure(facecolor='white')
         plt.hot()
@@ -90,6 +130,10 @@ class Plotter:
         plt.show()
 
     def angle_v_sensor_plot(self, x0=0.5, y0=0.5, title="Contour Plot of Q(s,a)"):
+        #
+        # Show a contour plot of how Q varies as we change car rotation
+        # and sensor strength at a fixed position (x0,y0) in the game area.
+        #
         x,y,z = self.angle_v_sensor_contours(x0, y0)
         plt.figure(facecolor='white')
         plt.hot()
@@ -101,6 +145,9 @@ class Plotter:
         plt.show()
 
     def update_theta(self, *args):
+        # 
+        # Companion to theta_anim, which increments the angle
+        #
         self.theta += np.pi/20.0
         x,y,z = self.location_contours([0.2, 0.2, 0.2, self.theta])
         self.theta %= (np.pi*2.0)
@@ -109,6 +156,9 @@ class Plotter:
         return self.im
 
     def theta_anim(self):
+        #
+        # Animate the contour plot from above by varying theta from 0 to 2*pi
+        #
         self.theta = 0
         x,y,z = self.location_contours([0.2, 0.2, 0.2, self.theta])
         self.fig = plt.figure()
@@ -119,6 +169,9 @@ class Plotter:
         plt.show()
 
     def theta_gif(self):
+        #
+        # Create an animated gif of the contour plot from above by varying theta from 0 to pi
+        #
         self.theta = 0
         x,y,z = self.location_contours([0.2, 0.2, 0.2, self.theta])
         self.fig = plt.figure()
@@ -130,7 +183,9 @@ class Plotter:
         ani.save('figures/theta.gif', dpi=80, writer='imagemagick')
 
     def update_sensor(self, *args):
-        self.theta += np.pi/20.0
+        # 
+        # Companion to sensor_anim, which increments the angle
+        #
         self.sensor += 0.02
         if self.sensor > 1:
             self.sensor = 0.0
@@ -141,6 +196,10 @@ class Plotter:
         return self.im
 
     def sensor_anim(self, theta=0):
+        # 
+        # Animate the contour plot by changing sensor values and holding
+        # the angle fixed at theta.
+        #
         self.theta = theta
         self.sensor = 0.0
         x,y,z = self.location_contours([0,0,0, self.theta])
