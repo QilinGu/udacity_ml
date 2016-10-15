@@ -1,8 +1,8 @@
 #
-# Reinforcement learning agent for the "driverless car" using Tensorflow
+# Some plotting routes to show off the learning agent for the "driverless car" using Tensorflow
 #
 # @scottpenberthy
-# October, 2016
+# November 1, 2016
 #
 
 import tensorflow as tf

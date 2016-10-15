@@ -7,8 +7,6 @@ of the Udacity Machine Learning Engineer Nanodegree.
 Scott Penberthy  
 November 1, 2016
 
-_[Ed. This is a work in progress, publishing by the end of October if I'm lucky!]_
-
 ## I. Definition
 
 ### Project Overview
