@@ -118,6 +118,17 @@ class Plotter:
         ani = animation.FuncAnimation(self.fig, self.update_theta, interval=50, blit=False)
         plt.show()
 
+    def theta_gif(self):
+        self.theta = 0
+        x,y,z = self.location_contours([0.2, 0.2, 0.2, self.theta])
+        self.fig = plt.figure()
+        self.im = plt.imshow(z, interpolation='bilinear', origin='lower', cmap=cm.inferno)
+        CBI = plt.colorbar(self.im, orientation='horizontal', shrink=0.8)
+        plt.xlabel('X %')
+        plt.ylabel('Y %')
+        ani = animation.FuncAnimation(self.fig, self.update_theta, frames=np.arange(0,20), interval=200, blit=False)
+        ani.save('figures/theta.gif', dpi=80, writer='imagemagick')
+
     def update_sensor(self, *args):
         self.theta += np.pi/20.0
         self.sensor += 0.02

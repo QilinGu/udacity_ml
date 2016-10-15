@@ -408,6 +408,8 @@ was a keeper.
 | ---------------- | --------: | -----: | -----: | -----:|
 | Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
 
+![Changing Theta](figures/theta.gif)
+
 
 ### Model Evaluation and Validation
 In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:
