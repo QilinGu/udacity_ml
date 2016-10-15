@@ -261,6 +261,16 @@ class Learner:
         self.t = n_observe+1
 
     def reset(self, plotting_only = False, initvars=True):
+        #
+        # Go to a virgin state.  The plotting_only flag is needed
+        # to avoid conflicts between PyGame and MatPlotLib which
+        # I needed to showcase final results.  The initvars
+        # flag is used when we want to evaluate a model for
+        # performance - we don't want to wipe out weights and
+        # biases we've loaded from one of our models.
+        #
+        # See plotting.py
+        #
         if not plotting_only:
             self.g = Game(1.0)
         self.init_common()
@@ -272,22 +282,36 @@ class Learner:
             self.init_game()
 
     def init_game(self):
+        #
+        # Start our PyGame simulator, grab
+        # a frame and make it or first state.
+        #
+        # Note you can change n_history to the number of 
+        # recent events you want to keep as part of the state
+        # as in the Deep Q Learning paper.  I ended up with 1 after
+        # trying many combo's.
+        #
         self.start_logging()
         _, frame, terminal = self.g.step(0)
         frame = prepare_frame(frame)
         self.frames = [frame for i in range(n_history)]
 
     def guess_actions(self):
+        #
+        # Use the feed-forward network to compute Q(s,a) at time t for all a, at once.
+        #
         self.s_t = np.ravel(np.array(self.frames))  #state
         self.q_t = self.q_target.predict(self.s, np.array([self.s_t]))[0]
 
     def choose_action(self):
         # choose an action
+        #
+        # If we want a random baseline, or are learning and epsilon isn't 
+        # degraded, or we haven't finished observing, then pick a random act.
         if self.baseline or (random.random() < self.epsilon) or (self.t < n_observe):
             self.a_t = np.random.randint(0,3)
             self.g.state.hud = "*"+str(self.g.total_reward)
         else:
-
             self.a_t = self.q_t.argmax() # best action index
             self.g.state.hud = str(self.g.total_reward)
         if self.epsilon > self.min_epsilon and self.t > n_observe:
@@ -303,11 +327,17 @@ class Learner:
         self.s_t1 = np.ravel(np.array(self.frames))
 
     def track_top_score(self):
+        # as it saysa.  We track in Python, then stuff the value into Tensorflow for
+        # Tensorboard to pick up.  We also track the number of steps we were able
+        # to achieve to print out basic progress during an epoch (say 10,000 frames).
+        #
         self.games.append(self.g.state.num_steps)
         self.score_val = max(self.score_val, self.games[-1])
         self.s.run(tf.assign(self.score, self.score_val))
 
     def remember_for_later(self):
+        # Add to our local memory from which we train our network. This offline training
+        # from recent memory is based on actual biology of the hippocampus.
 #        self.r_t = min(10,max(-10, self.r_t))
         self.replay.append([self.s_t, self.a_t, self.r_t, self.s_t1, self.terminal*1, np.max(self.q_t)])
         if (len(self.replay) > n_memory_size):
@@ -319,6 +349,11 @@ class Learner:
             self.games_played += 1
             
     def get_batch(self):
+        # 
+        # Fetch a random batch of states to learn from.  Actually, its
+        # not so random here.  I make sure half of the states are penalties,
+        # or as many as we have, then fill the rest with good ones.
+        #
         a = np.array(self.replay)
         goofs = a[a[:,2] < 0]
         oops = random.sample(goofs, min(len(goofs),n_batch_size/2))
@@ -333,6 +368,8 @@ class Learner:
             print "Epoch Mean score", np.mean(self.games)
 
     def learn_by_replay(self):
+        # As it says.  Grab a batch, see how we're off from the target,
+        # and update our weights.
         if self.t > n_observe:
             self.learning_step += 1
             summary, q_t, loss = self.q_train.learn(self.s, self.q_target, self.get_batch())
@@ -356,7 +393,7 @@ class Learner:
             self.learn_by_replay()
 
     def demo(self, test=True, n=1000):
-        # 1k frames
+        # Perform 1000 frames with a live demo.
         not self.mute() or not self.mute()
         if test:
             self.test_mode = True
@@ -368,6 +405,12 @@ class Learner:
             self.show_epoch_stats()
 
     def debug(self):
+        #
+        # Enter a continuous loop that looks for any keyboard
+        # or mouse activity, printing out our Q values at
+        # each iteration.  I use this to test the network
+        # and see what's coming from the simulator.
+        #
         ok = True
         while ok:
             self.step()
@@ -376,6 +419,10 @@ class Learner:
             pygame.event.wait()
 
     def explore(self):
+        #
+        # This is similar to debug, expect we print out
+        # the raw state information instead.
+        #
         ok = True
         while ok:
             self.step()
@@ -384,6 +431,10 @@ class Learner:
             pygame.event.wait()
 
     def evaluate(self, initvars=True):
+        #
+        # Create an even playing field for evaluting a model.
+        # Run it for 1000 games and print out basic statistics.
+        #
         self.games_played = 0
         random.seed(0)
         np.random.seed(seed=0)
@@ -411,7 +462,11 @@ class Learner:
 
 
     def cycle(self, n=10):
-        # 100k frames
+        # 
+        # This is the core of the trainer.  It runs 10,000 steps 
+        # and trains merrily along without the graphic visualization
+        # to slow it down.
+        # 
         self.mute() or self.mute()
         self.g.reset()
         loss_data = []
@@ -427,5 +482,8 @@ class Learner:
         return loss_data
 
     def load_winner(self):
+        #
+        # Load the winning, saved model from the final project.
+        #
         self.saver = tf.train.Saver()
         self.saver.restore(self.s,"models/narrow-deep-pipe.ckpt")
