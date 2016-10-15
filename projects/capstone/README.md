@@ -410,7 +410,7 @@ was a keeper.
 
 ![Changing Theta](figures/theta.gif)
 
-#[Best Qmax](figures/qmax_win.png)
+![Best Qmax](figures/qmax_win.png)
 
 
 ### Model Evaluation and Validation
