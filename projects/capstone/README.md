@@ -419,7 +419,10 @@ for recovering from a crash, which can leave the agent close to an obstruction.
 
 ### Model Evaluation and Validation
 
-We chose a deeper, narrow network to learn the Q function.  Our final agent
+![Final Model](figures/final.gif)
+
+We chose a deeper, narrow network to learn the Q function that drove the simulation
+you see above.  This was one of the trickier moves.  Our final agent
 used the normalized sensor readings (described earlier) as the input layer.  We specified
 our layers as follows:
 

@@ -201,7 +201,7 @@ class Learner:
 
     def reset(self, plotting_only = False, initvars=True):
         if not plotting_only:
-            self.g = Game(0.4)
+            self.g = Game(1.0)
         self.init_common()
         if initvars:
            self.init_for_training()
@@ -211,7 +211,6 @@ class Learner:
             self.init_game()
 
     def init_game(self):
-        self.g = Game(0.4)
         self.start_logging()
         _, frame, terminal = self.g.step(0)
         frame = prepare_frame(frame)
