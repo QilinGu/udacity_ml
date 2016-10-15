@@ -355,7 +355,7 @@ from -500 to -100, then adding some basic functionality for tracking performance
 for building our neural network.  We say our implemenation is "without the deep," as our network
 is a simple, fully-connected network versus their deep convolutional network with hundreds of layers.  We
 are not operating from pixels, nor do we want to insist on an expensive GPU.
-Wee focus on a simpler, pedagogical problem of three sensors
+We focus on a simpler, pedagogical problem of three sensors
 and toy game physics.
 
 Tensorflow has a Python front-end where you first define all the input
@@ -403,7 +403,11 @@ and was now achieving scores in the thousands with a Qmax nearly 10x the best gr
 was a keeper.
 
 ## IV. Results
-_(approx. 2-3 pages)_
+
+|  Agent           | Top Score | Mean   | Stdev  | Low   |
+| ---------------- | --------: | -----: | -----: | -----:|
+| Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
+
 
 ### Model Evaluation and Validation
 In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:

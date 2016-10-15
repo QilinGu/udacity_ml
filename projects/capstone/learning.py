@@ -124,6 +124,7 @@ class SQN:
         summary, _, q_t, loss = session.run([self.summaries, self.optim, self.q_value, self.loss], inputs)
         return summary, q_t, loss
 
+
 # Construct model
 
 def prepare_frame(frame):
@@ -139,7 +140,7 @@ def prepare_frame(frame):
 
 class Learner:
 
-    def __init__(self):
+    def __init__(self, plotting_only=False):
         self.s = tf.Session()
         self.q_train = SQN('q_train', True)
         self.q_train.build_optimizer()
@@ -149,7 +150,7 @@ class Learner:
         self.score = tf.Variable(0.0, name="score")
         self.score_val = 0.0
         tf.scalar_summary('score', self.score)
-        self.reset()
+        self.reset(plotting_only)
 
     def mute(self):
         toggle = not self.g.draw_screen
@@ -166,11 +167,10 @@ class Learner:
     def log(self, summary):
         self.train_writer.add_summary(summary, self.t)
 
-    def reset(self):
-        self.g = Game(0.4)
+    def init_common(self):
+        # initialize variables common to training and testing
         self.t = 0
         self.learning_step = 0
-        self.epsilon = 1.0
         self.replay = []
         self.losses = []
         self.games = []
@@ -185,8 +185,33 @@ class Learner:
         self.baseline = False
         # enable logging
         self.q_train.summaries = self.q_target.summaries = self.summaries = tf.merge_all_summaries()
+
+    def init_for_training(self):
+        self.epsilon = 1.0
         self.init = tf.initialize_all_variables()
         self.s.run(self.init)
+
+    def init_for_testing(self):
+        # play through without randomness
+        self.baseline = False
+        self.epsilon = 0
+        self.learning_step = 0
+        self.min_epsilon = 0
+        self.t = n_observe+1
+
+    def reset(self, plotting_only = False, initvars=True):
+        if not plotting_only:
+            self.g = Game(0.4)
+        self.init_common()
+        if initvars:
+           self.init_for_training()
+        else:
+            self.init_for_testing()
+        if not plotting_only:
+            self.init_game()
+
+    def init_game(self):
+        self.g = Game(0.4)
         self.start_logging()
         _, frame, terminal = self.g.step(0)
         frame = prepare_frame(frame)
@@ -198,10 +223,11 @@ class Learner:
 
     def choose_action(self):
         # choose an action
-        if self.baseline or random.random() < self.epsilon or self.t < n_observe:
+        if self.baseline or (random.random() < self.epsilon) or (self.t < n_observe):
             self.a_t = np.random.randint(0,3)
             self.g.state.hud = "*"+str(self.g.total_reward)
         else:
+
             self.a_t = self.q_t.argmax() # best action index
             self.g.state.hud = str(self.g.total_reward)
         if self.epsilon > self.min_epsilon and self.t > n_observe:
@@ -297,12 +323,12 @@ class Learner:
             pygame.event.get()
             pygame.event.wait()
 
-    def evaluate(self):
+    def evaluate(self, initvars=True):
         self.games_played = 0
         random.seed(0)
         np.random.seed(seed=0)
         tf.set_random_seed(0)
-        self.reset()
+        self.reset(initvars=initvars)
         self.games = []
         self.test_mode = True
         while not self.mute():
@@ -321,7 +347,6 @@ class Learner:
         print "Std dev:", std1
         print "Low:", low
         print "Hi:", hi
-        self.test_mode = False
         self.reset()
 
 
@@ -340,3 +365,7 @@ class Learner:
                 print these
                 loss_data.append(these)
         return loss_data
+
+    def load_winner(self):
+        self.saver = tf.train.Saver()
+        self.saver.restore(self.s,"models/narrow-deep-pipe.ckpt")
