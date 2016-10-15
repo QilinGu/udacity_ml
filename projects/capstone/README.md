@@ -467,7 +467,7 @@ also can't see behind its movement with the simple sensors.  The agent often tur
 as though the objects suddenly appeared.  In fact, they have!  The sensors can't tell the difference.
 
 What's clearly missing here is an internal model of the environment.  The original Deep Q Network
-had most of pixels, then 
+had most of the pixels, then 
 numerous convolution layers to analyze the world.  Our agent has 3 feelers.  All objects and walls look the same and we
 only see three pinholes around us.
 
