@@ -493,8 +493,7 @@ and a mean of 100.   When crashes occur, they seem to occur early.  This is cons
 our observation that crashes often happen in clusters upon recovery, delivering many short games.
 The "smarter" agent was able to keep many games going much longer, into the thousands of frames.
 The learning was achieved after an initial plateau.  We found that, indeed, the deeper models
-performed better than the shallow, 2-layer models.  This pedagogical example, however, has 
-poor information and weak controls.
+performed better than the shallow, 2-layer models. 
 
 
 ## V. Conclusion
@@ -506,29 +505,29 @@ Tensorflow was achieved.  We have
 - demonstrated shallow vs. deeper networks and their capability
 - leveraged Tensorflow for visualization and computation
 - leveraged a gaming environment for live visualization
-- exposed problem areas in autonomous vehicles, seeing a need for maps and SLAM.
+- exposed problem areas in autonomous vehicles, seeing a need for maps, SLAM and better sensors.
 
 ### Reflection
-In this section, you will summarize the entire end-to-end problem solution and discuss one or two particular aspects of the project you found interesting or difficult. You are expected to reflect on the project as a whole to show that you have a firm understanding of the entire process employed in your work. Questions to ask yourself when writing this section:
-- _Have you thoroughly summarized the entire process you used for this project?_
-- _Were there any interesting aspects of the project?_
-- _Were there any difficult aspects of the project?_
-- _Does the final model and solution fit your expectations for the problem, and should it be used in a general setting to solve these types of problems?_
+I can see now why pedagogical environments are rare.  Tensorflow and Deep Q Learning have a substantial learning curve.
+Worse, the deep convolutional networks today require expensive, custom hardware to achieve a modicum
+of performance.  Current offerings are limited
+in that the latest CUDA software, Docker containers, Tensorflow libraries, Python libraries, and APIs are in flux
+and often incompatible. Still, we were able to achieve one environment that I hope will help others learn about
+these powerful tools!
+
+As for the toy example, several hours playing with the model cause me to scream for better
+sensors.  The simple, "pinhole" views of our surroundings are woefully insufficient for
+planning and detecting collisions.  Even still, watching our networks learn, experimenting with
+different shapes, and getting to know the Tensorflow tools was quite educational and rewarding.
 
 ### Improvement
-In this section, you will need to provide discussion as to how one aspect of the implementation you designed could be improved. As an example, consider ways your implementation can be made more general, and what would need to be modified. You do not need to make this improvement, but the potential solutions resulting from these changes are considered and compared/contrasted to your current solution. Questions to ask yourself when writing this section:
-- _Are there further improvements that could be made on the algorithms or techniques you used in this project?_
-- _Were there algorithms or techniques you researched that you did not know how to implement, but would consider using if you knew how?_
-- _If you used your final solution as the new benchmark, do you think an even better solution exists?_
 
------------
+An enhanced, 3D environment would be fun and more realistic, much like aerospace engineers
+use flight simulators.  This would allow us to simulate a Lidar and more sophisticated sensors.
+We could also add code for creating internal models of the other agents in
+the 2D game based solely on sensor data.
+We could add better controls for the car, including braking, pausing, and accelerating, as well
+as a smarter crash recovery technique. 
 
-**Before submitting, ask yourself. . .**
-
-- Does the project report you’ve written follow a well-organized structure similar to that of the project template?
-- Is each section (particularly **Analysis** and **Methodology**) written in a clear, concise and specific fashion? Are there any ambiguous terms or phrases that need clarification?
-- Would the intended audience of your project be able to understand your analysis, methods, and results?
-- Have you properly proof-read your project report to assure there are minimal grammatical and spelling mistakes?
-- Are all the resources used for this project correctly cited and referenced?
-- Is the code that implements your solution easily readable and properly commented?
-- Does the code execute without error and produce results similar to those reported?
+Finally, we could downscale the simulation and implement this with full pixel input, following the research
+of the original Deep Q Learning team.   That might veer too far from the pedagogical intent.
