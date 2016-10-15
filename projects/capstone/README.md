@@ -404,13 +404,37 @@ was a keeper.
 
 ## IV. Results
 
+Our final agent used the normalized sensor readings as described earlier as the input, X.  These were fully
+connected first to a layer of 32 neurons, which was passed through a linear rectifier (RELU).  The output of
+these were fully connected to another layer of 64 neurons, and again passed through a RELU.  We repeated
+this six (6) times.  The final 64-neuron layer was fully connected to a layer of 32 neurons.  These, in turn,
+were fully connected to the output layer of 3 neurons corresponding to the Q values for going straight (0),
+turning left (1), or turning right (2).  We then trained this agent over 2.8 million iterations, creating
+the changes in QMax seen below. 
+
+![Best Qmax](figures/qmax_win.png)
+
+With a QMax of 1362, we then evaluated our network while it played 1000 games.  The network had certainly
+learned to navigate the environment better than random chance:
+
+
 |  Agent           | Top Score | Mean   | Stdev  | Low   |
 | ---------------- | --------: | -----: | -----: | -----:|
 | Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
 
+Visualizing a neural network can be challenging.  The animation below is one attempt.  The x-axis represents the
+x location as it ranges from left (0) to right (100%).  The y-axis represents the y location as it ranges from bottom (0)
+to top (100%).  We fix the sensor readings at 20% strength each, or 0.2.  We create a heat map where the darker, cooler colors 
+represent a low Q score, and brighter, hotter colors represent a high Q score.  We then animate the heatmap by rotating
+the toy car from facing to the right (0 degrees) to facing to the left (180 degrees) in 20 equal increments.  We've
+smoothed out the noise with a simple convolution to get a better sense of what the network is "thinking."
+
 ![Changing Theta](figures/theta.gif)
 
-![Best Qmax](figures/qmax_win.png)
+You'll note that the network believes a wide, center stripe through the diagonal is a reasonably safe area
+when heading to the right.  As the car turns, however, this band narrows and the network prefers having the 
+car in the lower right.  This makes sense!  If you're heading left, you'd like to be on the far right
+and away from the left wall.  This code can be seen in ```plotting.py```. 
 
 
 ### Model Evaluation and Validation
