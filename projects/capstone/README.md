@@ -459,7 +459,7 @@ and the network prefers having the
 car in the lower right.  This makes sense.  If you're heading left, you'd like to be on the far right
 and away from the left wall.  This code can be seen in ```plotting.py```. 
 
-The random movement of the cat, the slow moving objects, and the random start over millions of games
+The random movement of the cat, the slow moving objects, and the random start over thousands of games
 trained the agent to deal with multiple anomalies.  The agent appears robust to changes in the environment.
 
 However, the agent still crashes!  We observe that this often occurs upon recovery, where the
@@ -469,8 +469,7 @@ as though the objects suddenly appeared.  In fact, they have!  The sensors can't
 
 What's clearly missing here is an internal model of the environment.  The original Deep Q Network
 had most of pixels, then 
-numerous convolution layers to analyze the world.  Our little agent only has 3 feelers
-and a sense of where it is, in a very dark room.  All objects and walls look the same and we
+numerous convolution layers to analyze the world.  Our agent has 3 feelers.  All objects and walls look the same and we
 only see three pinholes around us.
 
 This toy car needs to create an internal model
