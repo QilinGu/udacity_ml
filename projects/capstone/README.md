@@ -41,6 +41,7 @@ without hitting things.  The car's throttle is stuck in the "on" position.  Hey,
 3. [PyGame](http://www.pygame.org/wiki/GettingStarted) for graphics
 4. [PyMunk](http://www.pymunk.org/en/latest/) for physics
 5. [Numpy](http://www.numpy.org/) for math
+6. [SciPy](http://www.scipy.org/) for more math to smooth plots
 
 This has been successfully tested on a MacBook Pro running OS X El Capitan.
 
