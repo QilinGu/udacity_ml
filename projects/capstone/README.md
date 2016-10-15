@@ -467,8 +467,13 @@ However, the agent still crashes!  We observe that this often occurs upon recove
 also can't see behind its movement with the simple sensors.  The agent often turns and collides
 as though the objects suddenly appeared.  In fact, they have!  The sensors can't tell the difference.
 
-What's clearly missing here is a model of the environment.  I had thought having x,y and heading would
-be helpful, and it is, but its not neough.  This toy car needs to create an internal model
+What's clearly missing here is an internal model of the environment.  The original Deep Q Network
+had most of pixels, then 
+numerous convolution layers to analyze the world.  Our little agent only has 3 feelers
+and a sense of where it is, in a very dark room.  All objects and walls look the same and we
+only see three pinholes around us.
+
+This toy car needs to create an internal model
 for the items in its environment, their direction of movement, as well as the stationary walls.  The walls form a static "map" and
 modeled items are "road hazards."  This is the job of GPS and SLAM in self-driving cars, or Simultaneous Localization
 and Mapping.  With a map in hand and a picture of nearby road hazards, we can more effectively
