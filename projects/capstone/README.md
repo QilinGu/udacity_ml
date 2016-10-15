@@ -403,10 +403,35 @@ and was now achieving scores in the thousands with a Qmax nearly 10x the best gr
 was a keeper.
 
 ## IV. Results
+We evaluated our final agent while it played 1000 games.  The network had certainly
+learned to navigate the environment better than random chance.  Our top score beat
+the random agent by an order of magnitude.  The mean score across all games was over
+3x better than random, but we skewed toward much higher values with a standard deviation
+again nearly 10x the random agent.  We matched the low values, namely, where the
+toy car restarts and instantly crashes.  This can occur from the crude approach we take
+for recovering from a crash, which can leave the agent close to an obstruction.
 
-Our final agent used the normalized sensor readings as described earlier as the input, X.  These were fully
-connected first to a layer of 32 neurons, which was passed through a linear rectifier (RELU).  The output of
-these were fully connected to another layer of 64 neurons, and again passed through a RELU.  We repeated
+
+|  Agent           | Top Score | Mean   | Stdev  | Low   |
+| ---------------- | --------: | -----: | -----: | -----:|
+| Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
+| Random           | 192       | 27.6   | 23.7   |   1.0 |
+
+### Model Evaluation and Validation
+
+We chose a deeper, narrow network to learn the Q function.  Our final agent
+used the normalized sensor readings (described earlier) as the input layer.  We specified
+our layers as follows:
+
+```python
+In[12]: n_hidden = [32] + [64]*6 + [32]
+```
+
+The input was fully connected to the first hidden layer of 
+32 artificial neurons, which was passed through a 20% dropout and then a linear rectifier (RELU).
+The dropout helps prevent overfitting.  The output of
+these were fully connected to another layer of 64 neurons, and again passed through a 20% dropout
+and a RELU.  We repeated
 this six (6) times.  The final 64-neuron layer was fully connected to a layer of 32 neurons.  These, in turn,
 were fully connected to the output layer of 3 neurons corresponding to the Q values for going straight (0),
 turning left (1), or turning right (2).  We then trained this agent over 2.8 million iterations, creating
@@ -414,35 +439,41 @@ the changes in QMax seen below.
 
 ![Best Qmax](figures/qmax_win.png)
 
-With a QMax of 1362, we then evaluated our network while it played 1000 games.  The network had certainly
-learned to navigate the environment better than random chance:
+Visualizing a neural network can be challenging.  The animation below is one attempt.  
 
-
-|  Agent           | Top Score | Mean   | Stdev  | Low   |
-| ---------------- | --------: | -----: | -----: | -----:|
-| Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
-
-Visualizing a neural network can be challenging.  The animation below is one attempt.  The x-axis represents the
+The x-axis represents the
 x location as it ranges from left (0) to right (100%).  The y-axis represents the y location as it ranges from bottom (0)
 to top (100%).  We fix the sensor readings at 20% strength each, or 0.2.  We create a heat map where the darker, cooler colors 
 represent a low Q score, and brighter, hotter colors represent a high Q score.  We then animate the heatmap by rotating
 the toy car from facing to the right (0 degrees) to facing to the left (180 degrees) in 20 equal increments.  We've
-smoothed out the noise with a simple convolution to get a better sense of what the network is "thinking."
+smoothed out the noise to get a better sense of what the network is "thinking."
 
 ![Changing Theta](figures/theta.gif)
 
 You'll note that the network believes a wide, center stripe through the diagonal is a reasonably safe area
-when heading to the right.  As the car turns, however, this band narrows and the network prefers having the 
-car in the lower right.  This makes sense!  If you're heading left, you'd like to be on the far right
+when heading to the right.  As the car rotates left from 0 to 180 degrees, however, this band narrows 
+and the network prefers having the 
+car in the lower right.  This makes sense.  If you're heading left, you'd like to be on the far right
 and away from the left wall.  This code can be seen in ```plotting.py```. 
 
+The random movement of the cat, the slow moving objects, and the random start over millions of games
+trained the agent to deal with multiple anomalies.  The agent appears robust to changes in the environment.
 
-### Model Evaluation and Validation
-In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:
-- _Is the final model reasonable and aligning with solution expectations? Are the final parameters of the model appropriate?_
-- _Has the final model been tested with various inputs to evaluate whether the model generalizes well to unseen data?_
-- _Is the model robust enough for the problem? Do small perturbations (changes) in training data or the input space greatly affect the results?_
-- _Can results found from the model be trusted?_
+However, the agent still crashes!  We observe that this often occurs upon recovery, where the
+"restart" places our toy car in a precarious position with the throttle at full power.  The agent
+also can't see behind its movement with the simple sensors.  The agent often turns and collides
+as though the objects suddenly appeared.  In fact, they have!  The sensors can't tell the difference.
+
+What's clearly missing here is a model of the environment.  I had thought having x,y and heading would
+be helpful, and it is, but its not neough.  This toy car needs to create an internal model
+for the items in its environment, their direction of movement, as well as the stationary walls.  The walls form a static "map" and
+modeled items are "road hazards."  This is the job of GPS and SLAM in self-driving cars, or Simultaneous Localization
+and Mapping.  With a map in hand and a picture of nearby road hazards, we can more effectively
+plan a route and navigate through tight spaces.  We also avoid being "surprised" and turning into
+an obstacle. 
+
+We also need better control of the car.  Having the throttle on full is dangerous indeed.  We
+need braking, stopping, starting and acceleration, as well as more nuanced control of the driving direction.
 
 ### Justification
 In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
