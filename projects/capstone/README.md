@@ -319,10 +319,7 @@ the number of frames before a crash occurs, at which point a game ends.  The car
 jumping from a cucumber, then the next game begins.  We report basic statistics on the scores from
 the 1000 games. The score to beat is 192.
 
-|  Agent           | Top Score | Mean   | Stdev  | Low   |
-| ---------------- | --------: | -----: | -----: | -----:|
-| Random           | 192       | 27.6   | 23.7   |   1.0 |
-
+![Table1](figures/table1.png)
 
 ## III. Methodology
 
@@ -552,11 +549,7 @@ again nearly 10x the random agent.  We matched the low values, namely, where the
 toy car restarts and instantly crashes.  This can occur from the crude approach we take
 for recovering from a crash, which can leave the agent close to an obstruction.
 
-
-|  Agent           | Top Score | Mean   | Stdev  | Low   |
-| ---------------- | --------: | -----: | -----: | -----:|
-| Deep & Narrow    | 2236      | 100.2  | 220.8  |   1.0 |
-| Random           | 192       | 27.6   | 23.7   |   1.0 |
+![Table2](figures/table2.png)
 
 ### Model Evaluation and Validation
 
