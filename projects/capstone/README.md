@@ -360,7 +360,7 @@ and toy game physics.
 The environment begins by loading ```learning.py```, instantiating a Learner() object, then
 invoking a few simple commands.  Let's work through it.  
 
-As a good measure, ```cd`` to the directory
+As a good measure, ```cd``` to the directory
 where you've loaded this repository, activate the virtual Tensorboard Python environment,
 clean out the training log data, launch
 tensorboard as a background process, and launch 
@@ -400,7 +400,7 @@ The demo will print out basic statistics for your score and how
 many games were played.  Score is the frame count before
 a crash.
 
-Now let's train for a bit.  We have a routine "cycle" that runs 100,000
+Now let's train for a bit.  We have a routine "cycle" that runs 100,000 but
 steps 10,000 (an "epoch") at a time.  This will "mute" the graphics
 display for speed.  After every 10,000 steps, we print out 
 our current time, then an array showing the mean "loss" encountered
@@ -418,7 +418,7 @@ Let s be the states in a minibatch whose size is specified by
 Loss is the difference between
 the sum of squares of Q(s,a) for all actions a as calculated 
 by the training network, versus the desired output which is the
-sum of squarees of (reward_a + Max(Q(s',a))) as calculated
+sum of squares of (reward_a + Max(Q(s',a))) as calculated
 by the target network for action a.  Recall that this is Bellman's equation, and
 we want to train our network to produce a nonlinear regression so that
 Q(s,a) is accurate, for all actions, in one feed forward pass.
