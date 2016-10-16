@@ -511,7 +511,7 @@ one wasn't interesting.  I sense market opportunity...
 ### Refinement
 
 We started with the best network ideas available online, namely a two-layer network.  This worked quite well, but we
-were frustrated that the car kept crashing.  We tried several tricks from the literature:
+were annoyed that the car kept crashing.  We tried several tricks from the literature:
 
 - Like Deep Q, we initially stacked the last four (4) state readings into a single input.  This got us to 120 for QMax.
 - We increased the stacking to 16.  This got us to 140 Qmax, and seeemed to be the alltime winner.
