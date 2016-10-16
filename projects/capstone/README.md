@@ -344,7 +344,7 @@ the network.  With smaller reward values, the Gaussian noise hid the signal and 
 
 ### Implementation
 
-Our implementation consists of two files.  
+Our implementation consists of essentially two files.  
 
 ```carmunk.py``` is a port of the original CarMunk car driving
 game so that it works properly with PyMunk 5.0 and Python 2.7.  We changed the negative reward for a crash
