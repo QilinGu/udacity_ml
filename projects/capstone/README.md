@@ -358,7 +358,9 @@ We focus on a simpler, pedagogical problem of three sensors
 and toy game physics.
 
 The environment begins by loading ```learning.py```, instantiating a Learner() object, then
-invoking a few simple commands.  Let's talk through it.  As a good measure, ```cd`` to the directory
+invoking a few simple commands.  Let's work through it.  
+
+As a good measure, ```cd`` to the directory
 where you've loaded this repository, activate the virtual Tensorboard Python environment,
 clean out the training log data, launch
 tensorboard as a background process, and launch 
