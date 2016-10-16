@@ -357,6 +357,116 @@ are not operating from pixels, nor do we want to insist on an expensive GPU.
 We focus on a simpler, pedagogical problem of three sensors
 and toy game physics.
 
+The environment begins by loading ```learning.py```, instantiating a Learner() object, then
+invoking a few simple commands.  Let's talk through it.  As a good measure, ```cd`` to the directory
+where you've loaded this repository, activate the virtual Tensorboard Python environment,
+clean out the training log data, launch
+tensorboard as a background process, and launch 
+an interactive Python shell. I often run tensorboard in a separate terminal window
+and let it sit.
+```
+% source activate tensorflow
+
+(tensorflow) % rm train/*
+
+(tensorflow) % tensorboard --logdir train &
+[ some logging output will appear]
+
+(tensorflow) % ipython
+```
+
+Let's load and instantiate a Learner class within our iPython shell:
+
+```python
+In(1): from learning import *
+
+In(2): ai = Learner()
+```
+
+You should see a separate window with our game environment, paused at the
+initial state.  Let's make sure everything is working.  Try 1000 steps:
+
+```python
+In(3): ai.demo()
+Games played  36
+Epoch Max score 95
+Epoch Mean score 27.4444444444
+
+In (4): 
+```
+The demo will print out basic statistics for your score and how
+many games were played.  Score is the frame count before
+a crash.
+
+Now let's train for a bit.  We have a routine "cycle" that runs 100,000
+steps 10,000 (an "epoch") at a time.  This will "mute" the graphics
+display for speed.  After every 10,000 steps, we print out 
+our current time, then an array showing the mean "loss" encountered
+in our training batches, the minimum lass, the standard deviation,
+and the maximum loss.  
+
+```python
+In(4): ai.cycle()
+t= 11000
+[654.53412, 322.84866, 86.578796, 1414.0239]
+```
+
+Let s be the states in a minibatch whose size is specified by
+```n_batch_size``` taken from a state memory of size ```n_memory_size```.
+Loss is the difference between
+the sum of squares of Q(s,a) for all actions a as calculated 
+by the training network, versus the desired output which is the
+sum of squarees of (reward_a + Max(Q(s',a))) as calculated
+by the target network for action a.  Recall that this is Bellman's equation, and
+we want to train our network to produce a nonlinear regression so that
+Q(s,a) is accurate, for all actions, in one feed forward pass.
+
+After we have seen ```n_observe``` steps, we also print descriptive statistics
+for the performance of our network every time we copy the trained network
+to our target network, as specified by ```n_network_update_frames```.  Recall
+that the Deep Q Learning algorithm trains a separate network on minibatches
+of experience history while it simultaneously runs the agent using a 
+target network.  This prevents thrashing and overfitting.
+
+```python
+In(4): ai.cycle()
+t= 11000
+[654.53412, 322.84866, 86.578796, 1414.0239]
+Games played  539
+Epoch Max score 144
+Epoch Mean score 30.3580705009
+t= 21000
+[474.16202, 251.2959, 79.489487, 1243.3118]
+Games played  774
+Epoch Max score 223
+Epoch Mean score 42.6255319149
+t= 31000
+[388.32297, 202.05305, 79.290771, 1086.0581]
+Games played  1020
+Epoch Max score 153
+Epoch Mean score 40.5081300813
+t= 41000
+[470.96552, 234.70471, 129.87579, 1320.3688]
+Games played  1281
+Epoch Max score 251
+Epoch Mean score 38.3908045977
+t= 51000
+[549.32666, 203.20442, 176.22263, 1079.8307]
+Games played  1546
+Epoch Max score 226
+Epoch Mean score 37.7773584906
+t= 61000
+[610.16583, 232.79211, 224.97626, 1264.9712]
+Games played  1759
+Epoch Max score 484
+Epoch Mean score 46.5774647887
+...
+
+```
+
+As you can see, the top score is slowly but gradually improving!  Let's talk a bit about Tensorflow,
+the library we use for our neural network.
+
 Tensorflow has a Python front-end where you first define all the input
 variables, the networks, and the output variables.  This forms a data pipeline, much like the graphics
 pipelines common in videogames.  When you "run" a network forward, Tensorflow interacts with
@@ -369,6 +479,32 @@ Tensorboard is a visualizer for variables, weights, biases and more.  You'll see
 for our maximum Q value and maximum Score from Python into Tensorflow on every iteration.  Tensorboard can only
 report on values stored in the C/C++ pipeline.  We dump the results to the log file every 100 iterations
 to keep the log file sizes in check. This took me a bit of time to figure out.
+
+In a separate browser window, navigate to "http://0.0.0.0:6006" to see Tensorbard visualizations
+of our network as it trains, which we showed earlier.  The repository begins with the good network 
+which consists of 8 layers.  Tensorboard will show you the weights as wN and biases as bN for each
+layer, as well as the loss, q_max, and top score over time.
+
+A lot of these libraries were new for me.  The primary challenges were grok'ing how to work with Tensorflow
+and Tensorboard, and the separation of variable space between Python and the C/C++ data pipeline.  Next, PyGame
+and PyMunk had released a new version of the code that broke the original CarMunk, so we had to figure out both
+the physics library and the gaming environment.  Finally, we had to implement the Deep Q Learning algorithm but
+substitute our simpler, pedagogical network for their convolutional network.  
+
+The longest standing bug was
+an improper treatment of the target and training networks.  For a few weeks I was training and simulating the
+same network, then copying it to an offline target.  Wrong.  My learner kept thrashing and not progressing well,
+causing me to wonder if simple networks would even work!  By careful digging in the related research to Deep Q
+Learning, I found a paper that explained how neural networks are unstable when you train and drive reinforcement
+learning at the same time.  Well, how about that.  I carefully analyzed the code and found my mistake.  Once
+that was in place, the learners took off!
+
+Originally I had planned to introduce
+a simple approach for working with GPUs, too.  After blowing a few hundred dollars on GPU hosting, though, I felt
+that was unreasonable for an academic exercise, and switched gears to simpler networks.  I also wanted to share
+my carefully honed Docker containers.  Wrestling NVida, Amazon, Docker, Tensorflow, PyGame, and MatPlotLib proved
+frustrating.  Even after I got them running, the cost of the daily container would exceed $500/month for 1 GPU, and
+one wasn't interesting.  I sense market opportunity... 
 
 ### Refinement
 

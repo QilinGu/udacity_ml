@@ -18,17 +18,17 @@ import math
 # Network parameters
 
 n_hidden = [32] + [64]*6 + [32]
-n_min_epsilon = 0.01
-n_input = 6
-n_actions = 3
-n_gamma = 0.90
-n_observe = 6400
-n_explore = 100000
-n_memory_size = 32000
-n_network_update_frames = 10000
-n_history = 1
-n_input = n_input * n_history
-n_batch_size = 32
+n_min_epsilon = 0.01  # minimum value of epsilon for an epsilon reinforcement learner
+n_input = 6 # the number of state values we'll use as input to our network
+n_actions = 3 # the number of output values we're trying to predict
+n_gamma = 0.90 # this is gamma from Bellman's equation
+n_observe = 6400 # The number of frames we want to sit and observe, filling memory
+n_explore = 100000 # The number of frames against which we'll anneal epsilon from 1 to min_epsilon
+n_memory_size = 32000 # The number frames we'll remember
+n_network_update_frames = 10000 # The number of frames in-between target network updates
+n_history = 1 # The number of adjacent input states to use when training the network
+n_input = n_input * n_history # Actual size of input
+n_batch_size = 32 # The size of a minibatch we extract from memory for each training cycle.
 
 class SQN:
 
@@ -41,6 +41,12 @@ class SQN:
         self.y_prime = None
         w = []
         b = []
+        #
+        # A placeholder is a top-level variable in Tensorflow
+        # that lets us inject values from Python into the data
+        # pipeline.  Here was ask for an X variable in our regressino
+        # Y = w*x + b
+        #
         self.x = tf.placeholder("float", [None, n_input], name="X")
 
         # Store layers weight & bias, initialize with white noise near 0
@@ -52,6 +58,11 @@ class SQN:
         self.weights = self.make_vars(w, track=track)
         self.biases = self.make_vars(b, constant=True, track=track)
         self.q_value = self.build_perceptron()
+        #
+        # Tensorboard will track the box plot values at every timestep
+        # and plots them for us if we give it a matrix of values.  Here
+        # we track the q_value which is a matrix of our q(s,a) predictions.
+        # 
         if track:
             tf.histogram_summary(self.name + "/q_value", self.q_value)
         self.q_action = tf.argmax(self.q_value, dimension=1)
@@ -65,13 +76,26 @@ class SQN:
         # them out as variables to allow for copying from
         # our smarter, training network to the operational, 
         # target network every n_network_update_frames frames.
+        #
+        # Variables are the main way to shuttle values between
+        # tensorflows c/c++ environment and our python environment.
+        #
         vars = {}
         for name, shape in spec:
             if constant:
+                # Create a constant at value 0.01 of the required shape.
                 vars[name] = tf.Variable(tf.constant(0.01, shape=shape), name=name)
             else:
+                # Initialize our values with a Gaussian distribution about 0,
+                # but set the standard deviation to 0.01 so its nice and tight
+                # white noise.
                 vars[name] = tf.Variable(tf.truncated_normal(shape, stddev=0.01), name=name)
             if track:
+                # If we want, track the values of these variables using
+                # the boxplot values (mean, standard deviation, min, max) at each
+                # frame.  These form the orange shapes that
+                # flow over time on Tensorboard as the mean and shape of the
+                # distributions change.
                 tf.histogram_summary(self.name + "/" + name, vars[name])
         return vars
 
@@ -79,6 +103,11 @@ class SQN:
         #
         # Load our weights and biaes from the trained network to the operational
         # target network.  We do this with an tensorflow assignment. 
+        #
+        # tf.assign will copy the large matrix of weight values from
+        # our current network to a target network, then do the same
+        # for biass.  "session.run" tells Tensorflow to run this "operation"
+        # in the C/C++ environment.
         #
         for key in self.weights.keys():
             session.run(tf.assign(self.weights[key], sqn.weights[key]))
@@ -95,11 +124,27 @@ class SQN:
         #
         w = self.weights
         b = self.biases 
+        #
+        # Here we ask tensorflow to compute one layer, multiplying our input
+        # matrix x by our weights using tf.matmul, then adding bias
+        # with tf.add, then finally adding a nonlinear rectifer tf.nn.relu
+        # that only passes values > 0.
+        #
         layers = [tf.nn.relu(tf.add(tf.matmul(self.x, w['w1']), b['b1']))]
         for i in range(1, len(n_hidden)):
             _i = str(i+1)
+            # Here we add a dropout to our prior layer using tf.nn.dropout,
+            # saying we want to preseve values 80% or 0.8 of the time.
             layers[i-1] = tf.nn.dropout(layers[i-1], 0.8)
+            #
+            # Repeat and add the next layer, using weights w_i and bias w_i
+            #
             layers += [tf.nn.relu(tf.add(tf.matmul(layers[i-1], w['w'+_i]),b['b'+_i]))]
+
+        #
+        # For our final layer, don't add the dropout, but fully connect it to our
+        # last layer of output values layers[:-1].
+        #
         nth = str(len(n_hidden)+1)
         result = tf.add(tf.matmul(layers[-1:][0], w['w'+nth]), b['b'+nth])
         return result
@@ -119,13 +164,39 @@ class SQN:
         # maximum longterm reward available to us in the new state s',
         # from all actions a' we could take in s'.
         #
+        # First we ask for placeholders, so we can inject our desired
+        # output y_prime, and also our desired action 0-n where n
+        # is the number of actions.
         self.y_prime = tf.placeholder('float32', [None], name='y_prime')
         self.action = tf.placeholder('int32', [None], name='action')
+        #
+        # Now here's a trick.  We want to optimize weights and biases
+        # so they adjust our prediction for q(s,a).  We isolate the Q(s,a)
+        # values with a one-hot network which will zero out all the q(s,a_i)
+        # values where a_i <> a. 
+        #
         action_one_hot = tf.one_hot(self.action, n_actions, 1.0, 0.0)
+        #
+        # we yank out our q(s,a) value by "reduce_sum" which replaces a tensor
+        # with a scalar.  Now, we'll have an stack of input states X,
+        # and a stack of scalar output values y.  Had we not used the onehot
+        # trick, each row would have all q(s,a_i) values for each action a_i.
+        #
         y = tf.reduce_sum(self.q_value * action_one_hot, reduction_indices=1)
+        #
+        # We compute the squared difference between our prediction y and
+        # the provided value y_prime.  We then take the mean of this
+        # for optimization.
         self.loss = tf.reduce_mean(tf.square(self.y_prime - y))
+        #
+        # We ask tensorboard to track teh value of loss and qmax over
+        # time so we can see what's happening.
         tf.scalar_summary('loss', self.loss)
         tf.scalar_summary('qmax', self.q_max)
+        #
+        # Now, we task tensorflow to use Geoff Hinton's backpropagation technique of
+        # RMSProp as seen here: http://sebastianruder.com/optimizing-gradient-descent/index.html#rmsprop
+        # to minimze our loss value.
         self.optim = tf.train.RMSPropOptimizer(0.00025,0.99,0.0,1e-6).minimize(self.loss)
 
     def predict(self, session, states):
@@ -144,19 +215,49 @@ class SQN:
         #
         # Perform a back-propagation.
         #
+        # Our history is a stack of arrays that contain
+        # (state s_t, action a_t, reward r_t, state s_t1, is terminal?)
+        # We use numpy's rather awkward syntax to rip out a column
+        # numbers from the array.  np.stack[a:,1] for example will
+        # stack all the values at array index one into its own
+        # separate, columnar array (our actions a_t) in this case.
+        #
         a = np.array(samples)
         X = np.stack(a[:,0])
         actions = np.stack(a[:,1])
         rewards = np.stack(a[:,2])
         X_t1 = np.stack(a[:,3])
         dead_ends = np.stack(a[:,4])
+        #
+        # Now use our training network to compute the maximum q value seen
+        # from our new state s_t1 after performing action a_t in state s_t.
+        #
         max_q_t1 = np.max(target_network.predict(session, X_t1), axis=1)*(1-dead_ends)
+        #
+        # Track this value for plotting
+        #
         self.q_max_val = max(np.max(max_q_t1), self.q_max_val)
+        #
+        # Now compute Bellman's equation, our desired output value
+        #
         y_prime = rewards + n_gamma * max_q_t1
+        #
+        # Feed alll this into our gradient descent optimizer which uses RMSProp
+        # to adjust weights that shift trom our prediction y to the desired output y'
+        #
         inputs = {self.y_prime: y_prime,
                   self.action: actions,
                   self.q_max: self.q_max_val,
                   self.x: X}
+        #
+        # We feed a "summaries" operator that tells tensorflow to track all the variables
+        # and give us output which we can later store.  We also ask Tensorflow to compute
+        # the output of our optimzer self.optim, the output of our training network q_value, 
+        # and the output of our loss function self.loss given the inputs above.
+        #
+        # We have to explicitly ask for these values to run, which we capture and return
+        # locally within Python.
+        #
         summary, _, q_t, loss = session.run([self.summaries, self.optim, self.q_value, self.loss], inputs)
         return summary, q_t, loss
 
