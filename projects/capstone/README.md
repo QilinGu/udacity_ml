@@ -349,6 +349,10 @@ Our implementation consists of essentially two files.
 ```carmunk.py``` is a port of the original CarMunk car driving
 game so that it works properly with PyMunk 5.0 and Python 2.7.  We changed the negative reward for a crash
 from -500 to -100, then adding some basic functionality for tracking performance and debugging.
+We found that original, higher negative value of -500 created a large squared loss, causing our weights and
+biases to oscillate and take longer to settle during backpropagation.  Bringing this more in line with
+the positive rewards, so that we are only -2.5x the maximum positive reward, added stability
+during training.  
 
 ```learning.py``` is an implementation of Deep Q reinforcement learning using Tensorflow
 for building our neural network.  We say our implemenation is "without the deep," as our network
