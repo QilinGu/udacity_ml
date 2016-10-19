@@ -101,20 +101,27 @@ In [6]: ai.g.step(2)
 ```
 
 
-### Metrics
-![QMax](figures/qmax.png)
+### Performance Metrics
 
 We will evaluate our algorithm by comparing its top score performance in
 1000 games against an agent that picks actions randomly.  That's all that 
 matters in the end -- bragging rights for the most number of iterations
 before a crash.  We need to do (much) better than random chance.
 
-We will track learning progress with "Q Max" from the Deep Q Learning paper, as seen above. Qmax is essentially
-a measure of agent confidence.  As the agent learns, its better able to predict what action to take, leading to
-higher rewards.  The "Q" value tells the agent how much it believes a given state is worth in terms of 
-longterm reward.  The longer the agent stays alive, the greater the reward, the higher QMax. Technically, Qmax 
-is the maximum value seen by the neural network that's learning to estimate the Q function,
-across all training examples, across time.
+### Training Metrics
+
+![QMax](figures/qmax.png)
+
+As we seek to beat random chance and improve our performance, we'll also
+want to track how well our algorithm is progressing.  We will be tracking
+QMax as described in the Deep Q Learning paper.
+
+Technically, Qmax is the maximum Q value seen by the neural network that's learning
+to estimate the Q function,
+across all training examples, across time. As the agent learns its better able to predict what action to take, leading to
+higher rewards over time.  The longer the agent stays alive, the greater the reward, the higher the Q value.
+
+### Visualizing Progress
 
 We'll use the TensorBoard visualizer available with Tensorflow to see our top score and QMax change over time.
 Our learning agent sits and observes for several thousand iterations before learning.  Like Mom taught us, 
@@ -344,12 +351,10 @@ the network.  With smaller reward values, the Gaussian noise hid the signal and 
 Our implementation consists of essentially two files.  
 
 ```carmunk.py``` is a port of the original CarMunk car driving
-game so that it works properly with PyMunk 5.0 and Python 2.7.  We changed the negative reward for a crash
-from -500 to -100, then adding some basic functionality for tracking performance and debugging.
-We found that original, higher negative value of -500 created a large squared loss, causing our weights and
-biases to oscillate and take longer to settle during backpropagation.  Bringing this more in line with
-the positive rewards, so that we are only -2.5x the maximum positive reward, added stability
-during training.  
+game so that it works properly with PyMunk 5.0 and Python 2.7.  We made
+one important change -- the reward for a crash is now -100 vs. -500 in the original
+design.  More on that later. We observed broad oscillations in the weights and biases with the -500
+value, causing very spikey loss results. 
 
 ```learning.py``` is an implementation of Deep Q reinforcement learning using Tensorflow
 for building our neural network.  We say our implemenation is "without the deep," as our network
@@ -467,8 +472,48 @@ Epoch Mean score 46.5774647887
 
 ```
 
-As you can see, the top score is slowly but gradually improving!  Let's talk a bit about Tensorflow,
-the library we use for our neural network.
+As you can see, the top score is slowly but gradually improving!  
+
+#### A note on reward "normalization"
+
+Here's the problem we discovered in the original ```carmunk``` game.  During backpropagation
+that adjusts weights in the network, we look to minimize loss.  Our loss was the sum of squares
+between predicted Q(s,a) and target Q(s,a) values.  The reward for most states
+falls in the 0-40 range given the maximum distance a sonar travels without
+hitting an object.  Further, this range had a mean of 20.  Our network begins with
+output values that are close to zero with a bit of white Gaussian noise.  That means
+our initial loss is typically 400-1200.  The network would adjust weights to
+reduce this number closer to 0. 
+
+Now assume we're near an optimal loss, then a crash happens, perhaps due to the cat
+approaching us from behind.  The crash introduces a loss of 25,000, more than 100x
+worse that what we typically see.  This spike sends a shockwave through the neural network,
+causing weights to take a larger step down a gradient curve to account for the
+error.  However, this large step can have a deleterious effect on other outputs,
+skipping over local and global minima, pushing
+us much further from optimum. The network slowly recovers and starts fine-tuning the network
+to handle the most common case.  Then, a crash happens, and we kick the
+network into another tail spin.
+
+This would repeat ad-nauseum.  We'd see the network approach a minimal loss, experience
+a spike, and the loss would swing wildly.  
+
+Mathematically speaking, our original problem space has an unusually large
+bias towards one parameter, creating a non-uniform shape that is difficult to traverse
+with gradient descent.  The large bias creates significant, numerical cliffs in the
+gradient space.  Its as though we were traversing a mountain, get near a peak, then
+slipped off the edge and fell into an abyss, only to slowly climb up the hill again
+and repeat the process.  Not fun.
+
+Reducing the magnitude of the reward lowers the bias, softens the cliffs,
+and makes our network less prone to these oscillations.  The lesson learned here is
+that we need rewards to stand out from the white Gaussian noise, but irregular or dramatic
+shifts can wreak havoc on gradient descent.  We call this _reward normalization_.
+
+#### Tensorflow 101
+
+Let's talk a bit about Tensorflow, the library we use for our neural network, which
+will be new to many researchers.
 
 Tensorflow has a Python front-end where you first define all the input
 variables, the networks, and the output variables.  This forms a data pipeline, much like the graphics
@@ -487,6 +532,8 @@ In a separate browser window, navigate to "http://0.0.0.0:6006" to see Tensorbar
 of our network as it trains, which we showed earlier.  The repository begins with the good network 
 which consists of 8 layers.  Tensorboard will show you the weights as wN and biases as bN for each
 layer, as well as the loss, q_max, and top score over time.
+
+#### Implementation challenges
 
 A lot of these libraries were new for me.  The primary challenges were grok'ing how to work with Tensorflow
 and Tensorboard, and the separation of variable space between Python and the C/C++ data pipeline.  Next, PyGame
